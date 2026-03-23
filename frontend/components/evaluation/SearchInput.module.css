@@ -1,0 +1,22 @@
+.label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--border-muted);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.94rem;
+}
+
+.input:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-soft) 75%, transparent);
+  outline-offset: 1px;
+}

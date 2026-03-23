@@ -1,0 +1,79 @@
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.form label {
+  display: grid;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.form input,
+.form textarea,
+.form select {
+  width: 100%;
+  border: 1px solid var(--border-muted);
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  padding: 11px 12px;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.form input:focus-visible,
+.form textarea:focus-visible,
+.form select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent-soft) 75%, transparent);
+  outline-offset: 1px;
+}
+
+.checkbox {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem !important;
+}
+
+.checkbox input {
+  width: 16px;
+  height: 16px;
+}
+
+.full {
+  width: 100%;
+}
+
+.error {
+  color: #b43f3f;
+  font-size: 0.78rem;
+}
+
+.success {
+  border: 1px solid #9cd7bc;
+  background: #e6f8ef;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.success h3 {
+  margin: 0;
+}
+
+.success p {
+  margin: 8px 0 0;
+  color: #1a5d3e;
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

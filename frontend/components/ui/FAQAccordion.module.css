@@ -1,0 +1,22 @@
+.wrap {
+  display: grid;
+  gap: 10px;
+}
+
+.item {
+  border: 1px solid var(--border-muted);
+  border-radius: 14px;
+  background: var(--bg-elevated);
+  padding: 12px 14px;
+}
+
+.item summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.item p {
+  margin: 10px 0 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}

@@ -1,0 +1,117 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "金融AI评测平台 Financial AI Evaluation" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - generic [ref=e10]:
+          - generic [ref=e11]: 金融AI评测平台
+          - generic [ref=e12]: Financial AI Evaluation
+      - navigation "主导航" [ref=e13]:
+        - link "首页" [ref=e14] [cursor=pointer]:
+          - /url: /
+        - link "评测竞技场" [ref=e15] [cursor=pointer]:
+          - /url: /arena
+        - link "评测榜单" [ref=e16] [cursor=pointer]:
+          - /url: /evaluations
+        - link "奖项认证" [ref=e17] [cursor=pointer]:
+          - /url: /awards
+        - link "报名参评" [active] [ref=e18] [cursor=pointer]:
+          - /url: /apply
+        - link "关于我们" [ref=e19] [cursor=pointer]:
+          - /url: /about
+      - link "申请参评" [ref=e20] [cursor=pointer]:
+        - /url: /apply
+  - main [ref=e21]:
+    - generic [ref=e539]:
+      - generic [ref=e541]:
+        - heading "报名参评" [level=1] [ref=e542]
+        - paragraph [ref=e543]: 提交你的产品资料，启动金融 AI 评测与认证流程，获取行业可传播的结果背书。
+      - generic [ref=e546]:
+        - article [ref=e547]:
+          - heading "基础评测服务" [level=2] [ref=e548]
+          - paragraph [ref=e549]: 覆盖通用评测维度，提供标准结论与改进建议。
+          - list [ref=e550]:
+            - listitem [ref=e551]: 适用于首次参评产品
+            - listitem [ref=e552]: 标准评测流程与结果摘要
+            - listitem [ref=e553]: 支持官网榜单展示
+        - article [ref=e554]:
+          - heading "高级认证服务" [level=2] [ref=e555]
+          - paragraph [ref=e556]: 在标准评测基础上提供更深入复核与传播支持。
+          - list [ref=e557]:
+            - listitem [ref=e558]: 专家复核深度报告
+            - listitem [ref=e559]: 认证等级与奖项评选机会
+            - listitem [ref=e560]: 可选联合传播支持
+      - generic [ref=e563]:
+        - heading "报名信息提交" [level=2] [ref=e564]
+        - generic [ref=e565]:
+          - generic [ref=e566]:
+            - generic [ref=e567]:
+              - text: 公司名称
+              - textbox "公司名称" [ref=e568]
+            - generic [ref=e569]:
+              - text: 产品名称
+              - textbox "产品名称" [ref=e570]
+            - generic [ref=e571]:
+              - text: 产品类型
+              - combobox "产品类型" [ref=e572]:
+                - option "请选择" [selected]
+                - option "金融大模型"
+                - option "金融智能体"
+                - option "MCP"
+                - option "Skill"
+            - generic [ref=e573]:
+              - text: 核心业务场景
+              - textbox "核心业务场景" [ref=e574]:
+                - /placeholder: 如：智能客服、风控辅助分析
+            - generic [ref=e575]:
+              - text: 联系人
+              - textbox "联系人" [ref=e576]
+            - generic [ref=e577]:
+              - text: 职位
+              - textbox "职位" [ref=e578]
+            - generic [ref=e579]:
+              - text: 手机号
+              - textbox "手机号" [ref=e580]
+            - generic [ref=e581]:
+              - text: 邮箱
+              - textbox "邮箱" [ref=e582]
+            - generic [ref=e583]:
+              - text: 附件链接（可选）
+              - textbox "附件链接（可选）" [ref=e584]:
+                - /placeholder: 可填网盘/资料链接
+          - generic [ref=e585]:
+            - text: 产品简介
+            - textbox "产品简介" [ref=e586]
+          - generic [ref=e587]:
+            - checkbox "我已阅读并同意评测条款与隐私说明" [ref=e588]
+            - generic [ref=e589]: 我已阅读并同意评测条款与隐私说明
+          - button "提交报名" [ref=e590]
+      - generic [ref=e593]:
+        - heading "常见问题" [level=2] [ref=e594]
+        - generic [ref=e595]:
+          - group [ref=e596]:
+            - generic "哪些产品可以报名？" [ref=e597] [cursor=pointer]
+          - group [ref=e598]:
+            - generic "评测周期一般多长？" [ref=e599] [cursor=pointer]
+          - group [ref=e600]:
+            - generic "是否会提供详细报告？" [ref=e601] [cursor=pointer]
+  - contentinfo [ref=e135]:
+    - generic [ref=e136]:
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - heading "金融AI评测平台" [level=3] [ref=e139]
+          - paragraph [ref=e140]: 聚焦金融行业 AI 产品评测与认证，构建可对比、可复核、可传播的行业评价体系。
+        - generic [ref=e141]:
+          - link "关于我们" [ref=e142] [cursor=pointer]:
+            - /url: /about
+          - link "评测声明" [ref=e143] [cursor=pointer]:
+            - /url: /awards
+          - link "商务合作" [ref=e144] [cursor=pointer]:
+            - /url: /apply
+      - generic [ref=e145]:
+        - generic [ref=e146]: 联系邮箱：contact@fin-ai-eval.cn
+        - generic [ref=e147]: © 2026 金融AI评测平台
+  - button "Open Next.js Dev Tools" [ref=e153] [cursor=pointer]:
+    - img [ref=e154]
+  - alert [ref=e157]

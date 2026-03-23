@@ -1,0 +1,32 @@
+{
+  "name": "financial_evaluation_v2",
+  "version": "1.0.0",
+  "description": "金融AI评测平台前端项目",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0"
+  },
+  "keywords": [
+    "nextjs",
+    "finance-ai",
+    "evaluation-platform"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "next": "^16.1.7",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.1.7",
+    "typescript": "^5.9.3"
+  }
+}

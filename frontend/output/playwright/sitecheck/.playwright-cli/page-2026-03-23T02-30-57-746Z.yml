@@ -1,0 +1,143 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "金融AI评测平台 Financial AI Evaluation" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - generic [ref=e10]:
+          - generic [ref=e11]: 金融AI评测平台
+          - generic [ref=e12]: Financial AI Evaluation
+      - navigation "主导航" [ref=e13]:
+        - link "首页" [ref=e14] [cursor=pointer]:
+          - /url: /
+        - link "评测竞技场" [ref=e15] [cursor=pointer]:
+          - /url: /arena
+        - link "评测榜单" [ref=e16] [cursor=pointer]:
+          - /url: /evaluations
+        - link "奖项认证" [ref=e17] [cursor=pointer]:
+          - /url: /awards
+        - link "报名参评" [ref=e18] [cursor=pointer]:
+          - /url: /apply
+        - link "关于我们" [ref=e19] [cursor=pointer]:
+          - /url: /about
+      - link "申请参评" [ref=e20] [cursor=pointer]:
+        - /url: /apply
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - paragraph [ref=e28]: FINANCIAL AI EVALUATION STANDARD
+            - heading "金融AI评测与认证中心" [level=1] [ref=e29]
+            - paragraph [ref=e30]: 围绕业务能力、合规风险与用户适当性，构建可对比、可复核、可传播的评测体系，帮助行业建立统一认知。
+            - generic [ref=e31]:
+              - link "查看评测榜单" [ref=e32] [cursor=pointer]:
+                - /url: /evaluations
+              - link "申请参评" [ref=e33] [cursor=pointer]:
+                - /url: /apply
+          - generic [ref=e34]:
+            - generic [ref=e35]:
+              - strong [ref=e36]: "8"
+              - emphasis [ref=e37]: 最新发布结果
+            - generic [ref=e38]:
+              - strong [ref=e39]: "27"
+              - emphasis [ref=e40]: 用户画像体系
+            - generic [ref=e41]:
+              - strong [ref=e42]: 自动化+专家复核
+              - emphasis [ref=e43]: 评测执行机制
+          - generic [ref=e44]:
+            - paragraph [ref=e46]: 评测判断框架
+            - generic [ref=e47]:
+              - article [ref=e48]:
+                - strong [ref=e49]: 业务能力
+                - paragraph [ref=e50]: 评估任务完成度与金融场景理解的稳定性。
+              - article [ref=e51]:
+                - strong [ref=e52]: 合规安全
+                - paragraph [ref=e53]: 检验风险提示、边界控制与错误引导抑制。
+              - article [ref=e54]:
+                - strong [ref=e55]: 适当性匹配
+                - paragraph [ref=e56]: 验证不同风险画像下建议是否匹配可承受范围。
+            - generic [ref=e57]:
+              - generic [ref=e58]: 评测对象
+              - generic [ref=e59]:
+                - generic [ref=e60]: 金融大模型
+                - generic [ref=e61]: 金融智能体
+                - generic [ref=e62]: MCP
+                - generic [ref=e63]: Skill
+        - complementary [ref=e64]:
+          - generic [ref=e65]:
+            - heading "本期焦点榜单" [level=2] [ref=e66]
+            - generic [ref=e67]: 2026年3月
+          - list [ref=e68]:
+            - listitem [ref=e69]:
+              - generic [ref=e70]:
+                - generic [ref=e71]: No.1
+                - generic [ref=e72]:
+                  - generic [ref=e73]: "91"
+                  - emphasis [ref=e74]: /100
+              - generic [ref=e77]:
+                - strong [ref=e78]: AntFinGLM 财富助手
+                - emphasis [ref=e79]: 蚂蚁集团
+            - listitem [ref=e82]:
+              - generic [ref=e83]:
+                - generic [ref=e84]: No.2
+                - generic [ref=e85]:
+                  - generic [ref=e86]: "90"
+                  - emphasis [ref=e87]: /100
+              - generic [ref=e90]:
+                - strong [ref=e91]: 天机认知风控大模型
+                - emphasis [ref=e92]: 网商银行
+            - listitem [ref=e95]:
+              - generic [ref=e96]:
+                - generic [ref=e97]: No.3
+                - generic [ref=e98]:
+                  - generic [ref=e99]: "89"
+                  - emphasis [ref=e100]: /100
+              - generic [ref=e103]:
+                - strong [ref=e104]: 盘古金融
+                - emphasis [ref=e105]: 华为
+          - link "查看完整榜单" [ref=e108] [cursor=pointer]:
+            - /url: /evaluations
+      - generic [ref=e110]:
+        - heading "评测流程概览" [level=2] [ref=e111]
+        - list [ref=e112]:
+          - listitem [ref=e113]:
+            - generic [ref=e114]: "1"
+            - paragraph [ref=e115]: 报名与资料提交
+          - listitem [ref=e116]:
+            - generic [ref=e117]: "2"
+            - paragraph [ref=e118]: 自动化评测脚本执行
+          - listitem [ref=e119]:
+            - generic [ref=e120]: "3"
+            - paragraph [ref=e121]: 专家复核与交叉评分
+          - listitem [ref=e122]:
+            - generic [ref=e123]: "4"
+            - paragraph [ref=e124]: 综合评级与认证判定
+          - listitem [ref=e125]:
+            - generic [ref=e126]: "5"
+            - paragraph [ref=e127]: 榜单发布与年度奖项评选
+      - article [ref=e130]:
+        - generic [ref=e131]:
+          - heading "2026 年度评测报名进行中" [level=2] [ref=e132]
+          - paragraph [ref=e133]: 支持金融大模型、金融智能体、MCP 与 Skill 产品参评，支持基础评测与高级认证服务。
+        - link "立即报名" [ref=e134] [cursor=pointer]:
+          - /url: /apply
+  - contentinfo [ref=e135]:
+    - generic [ref=e136]:
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - heading "金融AI评测平台" [level=3] [ref=e139]
+          - paragraph [ref=e140]: 聚焦金融行业 AI 产品评测与认证，构建可对比、可复核、可传播的行业评价体系。
+        - generic [ref=e141]:
+          - link "关于我们" [ref=e142] [cursor=pointer]:
+            - /url: /about
+          - link "评测声明" [ref=e143] [cursor=pointer]:
+            - /url: /awards
+          - link "商务合作" [ref=e144] [cursor=pointer]:
+            - /url: /apply
+      - generic [ref=e145]:
+        - generic [ref=e146]: 联系邮箱：contact@fin-ai-eval.cn
+        - generic [ref=e147]: © 2026 金融AI评测平台
+  - button "Open Next.js Dev Tools" [ref=e153] [cursor=pointer]:
+    - img [ref=e154]
+  - alert [ref=e157]

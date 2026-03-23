@@ -1,0 +1,126 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "金融AI评测平台 Financial AI Evaluation" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - generic [ref=e10]:
+          - generic [ref=e11]: 金融AI评测平台
+          - generic [ref=e12]: Financial AI Evaluation
+      - navigation "主导航" [ref=e13]:
+        - link "首页" [ref=e14] [cursor=pointer]:
+          - /url: /
+        - link "评测竞技场" [active] [ref=e15] [cursor=pointer]:
+          - /url: /arena
+        - link "评测榜单" [ref=e16] [cursor=pointer]:
+          - /url: /evaluations
+        - link "奖项认证" [ref=e17] [cursor=pointer]:
+          - /url: /awards
+        - link "报名参评" [ref=e18] [cursor=pointer]:
+          - /url: /apply
+        - link "关于我们" [ref=e19] [cursor=pointer]:
+          - /url: /about
+      - link "申请参评" [ref=e20] [cursor=pointer]:
+        - /url: /apply
+  - main [ref=e21]:
+    - generic [ref=e158]:
+      - generic [ref=e160]:
+        - heading "评测竞技场" [level=1] [ref=e161]
+        - paragraph [ref=e162]: 生成测试题并绑定用户画像，检验 AI 产品是否给出符合适当性要求的答案。
+      - generic [ref=e165]:
+        - article [ref=e166]:
+          - generic [ref=e168]:
+            - heading "评测配置" [level=2] [ref=e169]
+            - paragraph [ref=e170]: 按类别、任务与轮次生成当前回合的匿名对战配置。
+          - generic [ref=e171]:
+            - generic [ref=e172]:
+              - generic [ref=e173]:
+                - generic [ref=e174]: 产品类别
+                - combobox "产品类别 同类别产品独立对比，避免跨形态混排。" [ref=e175]:
+                  - option "金融大模型" [selected]
+                  - option "金融智能体"
+                  - option "MCP"
+                  - option "Skill"
+                  - option "其他"
+                - generic [ref=e176]: 同类别产品独立对比，避免跨形态混排。
+              - generic [ref=e177]:
+                - generic [ref=e178]: 基准任务
+                - combobox "基准任务 控制当前对战更偏投顾、客服合规或风控任务。" [ref=e179]:
+                  - option "投顾建议任务" [selected]
+                  - option "客服合规任务"
+                  - option "风控审慎任务"
+                - generic [ref=e180]: 控制当前对战更偏投顾、客服合规或风控任务。
+            - generic [ref=e181]:
+              - generic [ref=e182]:
+                - generic [ref=e183]: 评测轮次
+                - strong [ref=e184]: 8 轮
+              - slider "评测轮次 8 轮 4 轮 12 轮 20 轮" [ref=e185]: "8"
+              - generic [ref=e186]:
+                - generic [ref=e187]: 4 轮
+                - generic [ref=e188]: 12 轮
+                - generic [ref=e189]: 20 轮
+          - generic [ref=e191]:
+            - button "生成题目并开始匿名对战" [ref=e192]
+            - button "快速生成评测榜单" [ref=e193]
+        - article [ref=e194]:
+          - heading "当前类别基础样本" [level=2] [ref=e197]
+          - table [ref=e199]:
+            - rowgroup [ref=e200]:
+              - row "产品 机构" [ref=e201]:
+                - columnheader "产品" [ref=e202]
+                - columnheader "机构" [ref=e203]
+            - rowgroup [ref=e204]:
+              - row "AntFinGLM 财富助手 蚂蚁集团" [ref=e205]:
+                - cell "AntFinGLM 财富助手" [ref=e206]:
+                  - generic [ref=e209]: AntFinGLM 财富助手
+                - cell "蚂蚁集团" [ref=e210]
+              - row "天机认知风控大模型 网商银行" [ref=e211]:
+                - cell "天机认知风控大模型" [ref=e212]:
+                  - generic [ref=e215]: 天机认知风控大模型
+                - cell "网商银行" [ref=e216]
+              - row "盘古金融 华为" [ref=e217]:
+                - cell "盘古金融" [ref=e218]:
+                  - generic [ref=e221]: 盘古金融
+                - cell "华为" [ref=e222]
+              - row "腾讯金融大模型 腾讯 AI Lab" [ref=e223]:
+                - cell "腾讯金融大模型" [ref=e224]:
+                  - generic [ref=e227]: 腾讯金融大模型
+                - cell "腾讯 AI Lab" [ref=e228]
+              - row "金融 ChatGLM 系列 清华 KEG / Zhipu" [ref=e229]:
+                - cell "金融 ChatGLM 系列" [ref=e230]:
+                  - generic [ref=e233]: 金融 ChatGLM 系列
+                - cell "清华 KEG / Zhipu" [ref=e234]
+              - row "问财 HithinkGPT 客服版 同花顺" [ref=e235]:
+                - cell "问财 HithinkGPT 客服版" [ref=e236]:
+                  - generic [ref=e239]: 问财 HithinkGPT 客服版
+                - cell "同花顺" [ref=e240]
+              - row "言犀百晓 京东数科" [ref=e241]:
+                - cell "言犀百晓" [ref=e242]:
+                  - generic [ref=e245]: 言犀百晓
+                - cell "京东数科" [ref=e246]
+              - row "轩辕大模型 度小满" [ref=e247]:
+                - cell "轩辕大模型" [ref=e248]:
+                  - generic [ref=e251]: 轩辕大模型
+                - cell "度小满" [ref=e252]
+      - article [ref=e255]:
+        - heading "竞技场生成结果" [level=2] [ref=e256]
+        - paragraph [ref=e257]: 当前类别还没有生成竞技场结果，请先完成一次评测生成。
+  - contentinfo [ref=e135]:
+    - generic [ref=e136]:
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - heading "金融AI评测平台" [level=3] [ref=e139]
+          - paragraph [ref=e140]: 聚焦金融行业 AI 产品评测与认证，构建可对比、可复核、可传播的行业评价体系。
+        - generic [ref=e141]:
+          - link "关于我们" [ref=e142] [cursor=pointer]:
+            - /url: /about
+          - link "评测声明" [ref=e143] [cursor=pointer]:
+            - /url: /awards
+          - link "商务合作" [ref=e144] [cursor=pointer]:
+            - /url: /apply
+      - generic [ref=e145]:
+        - generic [ref=e146]: 联系邮箱：contact@fin-ai-eval.cn
+        - generic [ref=e147]: © 2026 金融AI评测平台
+  - button "Open Next.js Dev Tools" [ref=e153] [cursor=pointer]:
+    - img [ref=e154]
+  - alert [ref=e157]

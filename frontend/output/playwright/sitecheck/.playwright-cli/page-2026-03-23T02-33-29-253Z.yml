@@ -1,0 +1,167 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "金融AI评测平台 Financial AI Evaluation" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - generic [ref=e10]:
+          - generic [ref=e11]: 金融AI评测平台
+          - generic [ref=e12]: Financial AI Evaluation
+      - navigation "主导航" [ref=e13]:
+        - link "首页" [ref=e14] [cursor=pointer]:
+          - /url: /
+        - link "评测竞技场" [ref=e15] [cursor=pointer]:
+          - /url: /arena
+        - link "评测榜单" [active] [ref=e16] [cursor=pointer]:
+          - /url: /evaluations
+        - link "奖项认证" [ref=e17] [cursor=pointer]:
+          - /url: /awards
+        - link "报名参评" [ref=e18] [cursor=pointer]:
+          - /url: /apply
+        - link "关于我们" [ref=e19] [cursor=pointer]:
+          - /url: /about
+      - link "申请参评" [ref=e20] [cursor=pointer]:
+        - /url: /apply
+  - main [ref=e21]:
+    - generic [ref=e258]:
+      - generic [ref=e260]:
+        - heading "评测榜单" [level=1] [ref=e261]
+        - paragraph [ref=e262]: 聚焦金融大模型、金融智能体、MCP 与 Skill 能力的年度评测结果与认证信息。
+        - generic [ref=e263]: 更新时间：2026年3月23日 10:33:22
+      - article [ref=e268]:
+        - generic [ref=e270]:
+          - heading "本期排行" [level=2] [ref=e271]
+          - generic [ref=e272]:
+            - group [ref=e273]:
+              - generic "切换产品类别" [ref=e274] [cursor=pointer]:
+                - generic [ref=e275]: 金融大模型
+                - generic [ref=e276]: ▾
+            - group [ref=e277]:
+              - generic "切换历史榜单月份" [ref=e278] [cursor=pointer]:
+                - generic [ref=e279]: 2026年3月
+                - generic [ref=e280]: ▾
+        - generic [ref=e281]:
+          - generic [ref=e282]:
+            - generic [ref=e283]: 排名
+            - generic [ref=e284]: 产品
+            - generic [ref=e285]: 关键能力
+            - generic [ref=e286]: 综合得分
+          - generic [ref=e287]:
+            - link "AntFinGLM 财富助手，当前排名 No.1，综合得分 91" [ref=e288] [cursor=pointer]:
+              - /url: /evaluations/antfinglm-wealth
+              - generic [ref=e290]: No.1
+              - generic [ref=e293]:
+                - generic [ref=e294]: AntFinGLM 财富助手
+                - generic [ref=e295]: 蚂蚁集团
+              - generic [ref=e296]:
+                - generic [ref=e297]: 业务能力 92
+                - generic [ref=e298]: 合规安全 89
+                - generic [ref=e299]: 已评测
+              - generic [ref=e302]: "91"
+            - link "天机认知风控大模型，当前排名 No.2，综合得分 90" [ref=e305] [cursor=pointer]:
+              - /url: /evaluations/tianji-risk-model
+              - generic [ref=e307]: No.2
+              - generic [ref=e310]:
+                - generic [ref=e311]: 天机认知风控大模型
+                - generic [ref=e312]: 网商银行
+              - generic [ref=e313]:
+                - generic [ref=e314]: 业务能力 88
+                - generic [ref=e315]: 合规安全 93
+                - generic [ref=e316]: 已评测
+              - generic [ref=e319]: "90"
+            - link "盘古金融，当前排名 No.3，综合得分 89" [ref=e322] [cursor=pointer]:
+              - /url: /evaluations/pangu-finance
+              - generic [ref=e324]: No.3
+              - generic [ref=e327]:
+                - generic [ref=e328]: 盘古金融
+                - generic [ref=e329]: 华为
+              - generic [ref=e330]:
+                - generic [ref=e331]: 业务能力 90
+                - generic [ref=e332]: 合规安全 87
+                - generic [ref=e333]: 已评测
+              - generic [ref=e336]: "89"
+            - link "腾讯金融大模型，当前排名 No.4，综合得分 88" [ref=e339] [cursor=pointer]:
+              - /url: /evaluations/tencent-finance-model
+              - generic [ref=e341]: No.4
+              - generic [ref=e344]:
+                - generic [ref=e345]: 腾讯金融大模型
+                - generic [ref=e346]: 腾讯 AI Lab
+              - generic [ref=e347]:
+                - generic [ref=e348]: 业务能力 89
+                - generic [ref=e349]: 合规安全 86
+                - generic [ref=e350]: 已评测
+              - generic [ref=e353]: "88"
+            - link "金融 ChatGLM 系列，当前排名 No.5，综合得分 87" [ref=e356] [cursor=pointer]:
+              - /url: /evaluations/chatglm-finance-series
+              - generic [ref=e358]: No.5
+              - generic [ref=e361]:
+                - generic [ref=e362]: 金融 ChatGLM 系列
+                - generic [ref=e363]: 清华 KEG / Zhipu
+              - generic [ref=e364]:
+                - generic [ref=e365]: 业务能力 88
+                - generic [ref=e366]: 合规安全 85
+                - generic [ref=e367]: 已评测
+              - generic [ref=e370]: "87"
+            - link "问财 HithinkGPT 客服版，当前排名 No.6，综合得分 86" [ref=e373] [cursor=pointer]:
+              - /url: /evaluations/hithinkgpt-service
+              - generic [ref=e375]: No.6
+              - generic [ref=e378]:
+                - generic [ref=e379]: 问财 HithinkGPT 客服版
+                - generic [ref=e380]: 同花顺
+              - generic [ref=e381]:
+                - generic [ref=e382]: 业务能力 88
+                - generic [ref=e383]: 合规安全 83
+                - generic [ref=e384]: 已评测
+              - generic [ref=e387]: "86"
+            - link "言犀百晓，当前排名 No.7，综合得分 84" [ref=e390] [cursor=pointer]:
+              - /url: /evaluations/yanxi-baixiao
+              - generic [ref=e392]: No.7
+              - generic [ref=e395]:
+                - generic [ref=e396]: 言犀百晓
+                - generic [ref=e397]: 京东数科
+              - generic [ref=e398]:
+                - generic [ref=e399]: 业务能力 86
+                - generic [ref=e400]: 合规安全 82
+                - generic [ref=e401]: 已评测
+              - generic [ref=e404]: "84"
+            - link "轩辕大模型，当前排名 No.8，综合得分 83" [ref=e407] [cursor=pointer]:
+              - /url: /evaluations/xuanyuan-finance-model
+              - generic [ref=e409]: No.8
+              - generic [ref=e412]:
+                - generic [ref=e413]: 轩辕大模型
+                - generic [ref=e414]: 度小满
+              - generic [ref=e415]:
+                - generic [ref=e416]: 业务能力 82
+                - generic [ref=e417]: 合规安全 85
+                - generic [ref=e418]: 已评测
+              - generic [ref=e421]: "83"
+            - link "LightGPT，当前排名 No.9，综合得分 --" [ref=e424] [cursor=pointer]:
+              - /url: /evaluations/lightgpt-hundsun
+              - generic [ref=e426]: No.9
+              - generic [ref=e429]:
+                - generic [ref=e430]: LightGPT
+                - generic [ref=e431]: 恒生电子
+              - generic [ref=e432]:
+                - generic [ref=e433]: 业务能力 --
+                - generic [ref=e434]: 合规安全 --
+                - generic [ref=e435]: 评测中
+              - generic [ref=e438]: "--"
+  - contentinfo [ref=e135]:
+    - generic [ref=e136]:
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - heading "金融AI评测平台" [level=3] [ref=e139]
+          - paragraph [ref=e140]: 聚焦金融行业 AI 产品评测与认证，构建可对比、可复核、可传播的行业评价体系。
+        - generic [ref=e141]:
+          - link "关于我们" [ref=e142] [cursor=pointer]:
+            - /url: /about
+          - link "评测声明" [ref=e143] [cursor=pointer]:
+            - /url: /awards
+          - link "商务合作" [ref=e144] [cursor=pointer]:
+            - /url: /apply
+      - generic [ref=e145]:
+        - generic [ref=e146]: 联系邮箱：contact@fin-ai-eval.cn
+        - generic [ref=e147]: © 2026 金融AI评测平台
+  - button "Open Next.js Dev Tools" [ref=e153] [cursor=pointer]:
+    - img [ref=e154]
+  - alert [ref=e157]

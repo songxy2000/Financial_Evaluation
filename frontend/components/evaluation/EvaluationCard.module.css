@@ -1,0 +1,95 @@
+.card {
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 5%, transparent), transparent 120px),
+    var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  gap: 14px;
+  animation: revealUp 0.45s ease both;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.titleWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.titleBlock {
+  min-width: 0;
+}
+
+.rank {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--accent-strong);
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.org {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.summary {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.awards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scores {
+  display: flex;
+  gap: 10px;
+}
+
+.footer {
+  border-top: 1px solid var(--border-muted);
+  padding-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}

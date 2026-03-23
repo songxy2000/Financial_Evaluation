@@ -1,0 +1,42 @@
+.page {
+  padding-bottom: 12px;
+}
+
+.head {
+  margin-top: 26px;
+}
+
+.head h1 {
+  font-size: clamp(1.62rem, 2.45vw, 2.1rem);
+  font-weight: 500;
+}
+
+.head p {
+  margin-top: 10px;
+  color: var(--text-secondary);
+  max-width: min(100%, 1100px);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stats {
+  margin-top: 12px;
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.empty {
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+.empty p {
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

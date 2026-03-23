@@ -1,0 +1,116 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "金融AI评测平台 Financial AI Evaluation" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - generic [ref=e10]:
+          - generic [ref=e11]: 金融AI评测平台
+          - generic [ref=e12]: Financial AI Evaluation
+      - navigation "主导航" [ref=e13]:
+        - link "首页" [ref=e14] [cursor=pointer]:
+          - /url: /
+        - link "评测竞技场" [ref=e15] [cursor=pointer]:
+          - /url: /arena
+        - link "评测榜单" [ref=e16] [cursor=pointer]:
+          - /url: /evaluations
+        - link "奖项认证" [active] [ref=e17] [cursor=pointer]:
+          - /url: /awards
+        - link "报名参评" [ref=e18] [cursor=pointer]:
+          - /url: /apply
+        - link "关于我们" [ref=e19] [cursor=pointer]:
+          - /url: /about
+      - link "申请参评" [ref=e20] [cursor=pointer]:
+        - /url: /apply
+  - main [ref=e21]:
+    - generic [ref=e441]:
+      - generic [ref=e443]:
+        - heading "奖项与认证" [level=1] [ref=e444]
+        - paragraph [ref=e445]: 通过年度奖项与认证体系，为优秀金融 AI 产品提供行业背书与传播价值。
+      - article [ref=e448]:
+        - generic [ref=e449]:
+          - heading "2025 年度获奖名单" [level=2] [ref=e450]
+          - paragraph [ref=e451]: 基于业务价值、合规安全和适当性表现综合评定的年度荣誉榜单。
+        - generic [ref=e452]:
+          - article [ref=e453]:
+            - generic [ref=e454]:
+              - img [ref=e455]:
+                - generic [ref=e459]: "1"
+              - generic [ref=e460]: 年度冠军
+            - generic [ref=e461]:
+              - paragraph [ref=e462]: 年度最佳金融AI产品
+              - paragraph [ref=e465]: AntFinGLM 财富助手
+              - paragraph [ref=e466]: 蚂蚁集团 · 金融大模型
+          - article [ref=e467]:
+            - generic [ref=e468]:
+              - img [ref=e469]:
+                - generic [ref=e473]: "2"
+              - generic [ref=e474]: 年度亚军
+            - generic [ref=e475]:
+              - paragraph [ref=e476]: 最佳风控AI
+              - paragraph [ref=e479]: 天机认知风控大模型
+              - paragraph [ref=e480]: 网商银行 · 金融大模型
+          - article [ref=e481]:
+            - generic [ref=e482]:
+              - img [ref=e483]:
+                - generic [ref=e487]: "3"
+              - generic [ref=e488]: 年度季军
+            - generic [ref=e489]:
+              - paragraph [ref=e490]: 最佳客服AI
+              - paragraph [ref=e493]: 问财 HithinkGPT 客服版
+              - paragraph [ref=e494]: 同花顺 · 金融大模型
+        - generic [ref=e495]:
+          - heading "年度专项荣誉" [level=3] [ref=e496]
+          - list [ref=e497]:
+            - listitem [ref=e498]:
+              - strong [ref=e500]: 最佳营销AI
+              - paragraph [ref=e503]: 平安智能投顾
+              - paragraph [ref=e504]: 平安科技 · 金融智能体
+            - listitem [ref=e505]:
+              - strong [ref=e507]: 最具创新AI
+              - paragraph [ref=e510]: LongPort MCP
+              - paragraph [ref=e511]: 长桥证券 · MCP
+            - listitem [ref=e512]:
+              - strong [ref=e514]: 年度新锐AI
+              - generic [ref=e515]:
+                - generic [ref=e517]: MC
+                - paragraph [ref=e518]: 盈米MCP
+              - paragraph [ref=e519]: 盈米基金 · MCP
+      - generic [ref=e521]:
+        - article [ref=e522]:
+          - generic [ref=e523]:
+            - heading "参与评测，获得行业认证与奖项机会" [level=2] [ref=e524]
+            - paragraph [ref=e525]: 支持金融 AI 产品通过评测结果与认证体系建立市场信任，助力商务转化与品牌传播。
+          - link "申请参评" [ref=e526] [cursor=pointer]:
+            - /url: /apply
+        - article [ref=e527]:
+          - heading "认证状态说明" [level=3] [ref=e528]
+          - list [ref=e529]:
+            - listitem [ref=e530]:
+              - strong [ref=e531]: 已通过评测
+              - generic [ref=e532]: 完成评测并发布公开结论。
+            - listitem [ref=e533]:
+              - strong [ref=e534]: 推荐认证
+              - generic [ref=e535]: 在业务价值与风险控制上达到高水平。
+            - listitem [ref=e536]:
+              - strong [ref=e537]: 年度奖项
+              - generic [ref=e538]: 在细分能力上具备代表性表现。
+  - contentinfo [ref=e135]:
+    - generic [ref=e136]:
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - heading "金融AI评测平台" [level=3] [ref=e139]
+          - paragraph [ref=e140]: 聚焦金融行业 AI 产品评测与认证，构建可对比、可复核、可传播的行业评价体系。
+        - generic [ref=e141]:
+          - link "关于我们" [ref=e142] [cursor=pointer]:
+            - /url: /about
+          - link "评测声明" [ref=e143] [cursor=pointer]:
+            - /url: /awards
+          - link "商务合作" [ref=e144] [cursor=pointer]:
+            - /url: /apply
+      - generic [ref=e145]:
+        - generic [ref=e146]: 联系邮箱：contact@fin-ai-eval.cn
+        - generic [ref=e147]: © 2026 金融AI评测平台
+  - button "Open Next.js Dev Tools" [ref=e153] [cursor=pointer]:
+    - img [ref=e154]
+  - alert [ref=e157]
