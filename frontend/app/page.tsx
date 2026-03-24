@@ -1,6 +1,6 @@
 import Link from "next/link";
 import ProductLogo from "@/components/product/ProductLogo";
-import { getEvaluations, getRawEvaluations, normalizeRankingMonth } from "@/data/evaluations";
+import { getCategoriesFromApi, getEvaluationsResponse } from "@/data/evaluations";
 import styles from "./page.module.css";
 
 const processSteps = [
@@ -11,16 +11,18 @@ const processSteps = [
   "榜单发布与年度奖项评选",
 ];
 
-export default function HomePage() {
-  const currentBoard = getEvaluations({
+export default async function HomePage() {
+  const currentBoardResponse = await getEvaluationsResponse({
     category: "金融大模型",
-    month: normalizeRankingMonth(),
     status: "已评测",
     sort: "overall",
+    page: 1,
+    pageSize: 3,
   });
+  const currentBoard = currentBoardResponse.items;
   const heroTop = currentBoard.slice(0, 3);
   const maxHeroScore = Math.max(...heroTop.map((item) => item.overallScore), 100);
-  const groups = Array.from(new Set(getRawEvaluations().map((item) => item.category)));
+  const groups = await getCategoriesFromApi();
 
   return (
     <div className={styles.page}>
@@ -93,7 +95,7 @@ export default function HomePage() {
             <aside className={styles.heroAside}>
               <header className={styles.heroAsideHead}>
                 <h2>本期焦点榜单</h2>
-                <span className={styles.heroAsidePeriod}>2026年3月</span>
+                <span className={styles.heroAsidePeriod}>{currentBoardResponse.meta.monthLabel || "最新月"}</span>
               </header>
               <ul className={styles.heroRanking}>
                 {heroTop.map((item, index) => (

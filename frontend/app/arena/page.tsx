@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import ProductLogo from "@/components/product/ProductLogo";
 import { getAllCategories, getEvaluations } from "@/data/evaluations";
@@ -422,6 +421,9 @@ function buildVoteBonusFromDuel(session: DuelSession): Record<string, number> {
 export default function ArenaPage() {
   const categories = getAllCategories();
   const [category, setCategory] = useState<ProductCategory>("金融大模型");
+  const [baseItems, setBaseItems] = useState<EvaluationProduct[]>([]);
+  const [baseItemsLoading, setBaseItemsLoading] = useState(true);
+  const [baseItemsError, setBaseItemsError] = useState("");
   const [benchmark, setBenchmark] = useState<(typeof benchmarkOptions)[number]["value"]>("invest-advice");
   const [rounds, setRounds] = useState(8);
   const prompt = "请根据用户画像给出投资建议，并说明风险等级、适当性依据和不建议行为。";
@@ -430,10 +432,35 @@ export default function ArenaPage() {
   const [showGeneratedResult, setShowGeneratedResult] = useState(false);
   const [isDuelModalOpen, setIsDuelModalOpen] = useState(false);
 
-  const baseItems = useMemo(
-    () => getEvaluations({ category, status: "已评测", sort: "overall" }),
-    [category],
-  );
+  useEffect(() => {
+    let active = true;
+
+    getEvaluations({ category, status: "已评测", sort: "overall", page: 1, pageSize: 100 })
+      .then((items) => {
+        if (!active) return;
+        setBaseItems(items);
+        setBaseItemsError("");
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        setBaseItems([]);
+        setBaseItemsError(error instanceof Error ? error.message : "加载基础样本失败");
+      })
+      .finally(() => {
+        if (!active) return;
+        setBaseItemsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [category]);
+
+  function handleCategoryChange(nextCategory: ProductCategory) {
+    setCategory(nextCategory);
+    setBaseItemsLoading(true);
+    setBaseItemsError("");
+  }
 
   const generatedSet = useSyncExternalStore(
     subscribeArenaStore,
@@ -470,15 +497,28 @@ export default function ArenaPage() {
   }, [isDuelModalOpen]);
 
   function handleGenerateDirectly() {
-    if (baseItems.length === 0) return;
+    setDuelNotice("");
+    if (baseItemsLoading) {
+      setDuelNotice("基础样本加载中，请稍后再试。");
+      return;
+    }
+    if (baseItems.length === 0) {
+      setDuelNotice("当前类别暂无可用样本，无法快速生成。");
+      return;
+    }
     const nextSet = generateArenaResults(baseItems, benchmark, rounds, prompt, category);
     saveArenaSet(nextSet);
-    setShowGeneratedResult(false);
+    setShowGeneratedResult(true);
+    setDuelNotice("已快速生成并展开当前评测榜单。");
   }
 
   function startAnonymousDuel() {
     setDuelNotice("");
     setShowGeneratedResult(false);
+    if (baseItemsLoading) {
+      setDuelNotice("基础样本加载中，请稍后再开启匿名对战。");
+      return;
+    }
     if (baseItems.length < 2) {
       setDuelNotice("当前类别已评测样本不足 2 个，无法开启匿名双模型对战。");
       return;
@@ -624,7 +664,10 @@ export default function ArenaPage() {
                 <div className={styles.controlGroup}>
                   <label className={styles.field}>
                     <span className={styles.fieldLabel}>产品类别</span>
-                    <select value={category} onChange={(event) => setCategory(event.target.value as ProductCategory)}>
+                    <select
+                      value={category}
+                      onChange={(event) => handleCategoryChange(event.target.value as ProductCategory)}
+                    >
                       {categories.map((item) => (
                         <option key={item} value={item}>
                           {item}
@@ -711,22 +754,32 @@ export default function ArenaPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {baseItems.map((item) => (
-                      <tr key={item.id}>
-                        <td>
-                          <div className={styles.baseProductCell}>
-                            <ProductLogo
-                              productId={item.id}
-                              organization={item.organization}
-                              name={item.name}
-                              size="sm"
-                            />
-                            <span>{item.name}</span>
-                          </div>
-                        </td>
-                        <td>{item.organization}</td>
+                    {baseItemsLoading ? (
+                      <tr>
+                        <td colSpan={2}>正在加载基础样本...</td>
                       </tr>
-                    ))}
+                    ) : baseItems.length > 0 ? (
+                      baseItems.map((item) => (
+                        <tr key={item.id}>
+                          <td>
+                            <div className={styles.baseProductCell}>
+                              <ProductLogo
+                                productId={item.id}
+                                organization={item.organization}
+                                name={item.name}
+                                size="sm"
+                              />
+                              <span>{item.name}</span>
+                            </div>
+                          </td>
+                          <td>{item.organization}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={2}>{baseItemsError || "暂无基础样本数据"}</td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -844,14 +897,6 @@ export default function ArenaPage() {
                       })}
                     </tbody>
                   </table>
-                </div>
-                <div className={styles.bottomActions}>
-                  <Link
-                    href={`/evaluations?category=${encodeURIComponent(generatedSet.category)}`}
-                    className="btn btnPrimary"
-                  >
-                    应用并查看评测榜单
-                  </Link>
                 </div>
                 </>
               ) : null

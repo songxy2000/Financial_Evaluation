@@ -1,10 +1,7 @@
 import EvaluationsResultsClient from "@/components/evaluation/EvaluationsResultsClient";
 import {
-  getAllCategories,
-  getEvaluations,
-  getRankingMonthLabel,
-  getRankingMonthOptions,
-  normalizeRankingMonth,
+  getCategoriesFromApi,
+  getEvaluationsResponse,
 } from "@/data/evaluations";
 import type { EvaluationFilterParams, ProductCategory } from "@/types/evaluation";
 import styles from "./page.module.css";
@@ -21,14 +18,13 @@ function firstValue(value: string | string[] | undefined) {
 
 export default async function EvaluationsPage({ searchParams }: EvaluationsPageProps) {
   const resolvedSearchParams = await Promise.resolve(searchParams ?? {});
-  const categories = getAllCategories();
-  const rankingMonths = getRankingMonthOptions();
+  const categories = await getCategoriesFromApi();
   const defaultCategory: ProductCategory = "金融大模型";
   const rawCategory = firstValue(resolvedSearchParams.category);
   const normalizedCategory = categories.includes(rawCategory as ProductCategory)
     ? (rawCategory as ProductCategory)
     : defaultCategory;
-  const selectedMonth = normalizeRankingMonth(firstValue(resolvedSearchParams.month));
+  const selectedMonth = firstValue(resolvedSearchParams.month);
 
   const filters: EvaluationFilterParams = {
     category: normalizedCategory,
@@ -40,7 +36,11 @@ export default async function EvaluationsPage({ searchParams }: EvaluationsPageP
     q: firstValue(resolvedSearchParams.q),
   };
 
-  const list = getEvaluations(filters);
+  const response = await getEvaluationsResponse(filters);
+  const list = response.items;
+  const rankingMonths = response.meta.rankingMonths;
+  const effectiveMonth = response.meta.month;
+  const effectiveMonthLabel = response.meta.monthLabel;
   const dateParts = new Intl.DateTimeFormat("zh-CN", {
     timeZone: "Asia/Shanghai",
     year: "numeric",
@@ -70,10 +70,10 @@ export default async function EvaluationsPage({ searchParams }: EvaluationsPageP
             initialItems={list}
             category={normalizedCategory}
             sort={filters.sort ?? "overall"}
-            boardPeriodLabel={getRankingMonthLabel(selectedMonth)}
-            allowArenaOverride={selectedMonth === rankingMonths[0].value}
+            boardPeriodLabel={effectiveMonthLabel}
+            allowArenaOverride={effectiveMonth === rankingMonths[0]?.value}
             rankingMonths={rankingMonths}
-            selectedMonth={selectedMonth}
+            selectedMonth={effectiveMonth}
             currentCategory={normalizedCategory}
           />
         </div>

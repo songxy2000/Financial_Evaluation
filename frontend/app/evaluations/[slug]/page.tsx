@@ -19,7 +19,7 @@ function toneByAssessment(assessment: string) {
 
 export default async function EvaluationDetailPage({ params }: EvaluationDetailPageProps) {
   const { slug } = await params;
-  const product = getEvaluationBySlug(slug);
+  const product = await getEvaluationBySlug(slug);
 
   if (!product) notFound();
 

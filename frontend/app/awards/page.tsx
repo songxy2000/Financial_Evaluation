@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { getAwardsByYear, getAwardYears } from "@/data/awards";
-import { getRawEvaluations } from "@/data/evaluations";
 import ProductLogo from "@/components/product/ProductLogo";
 import styles from "./page.module.css";
 
@@ -43,11 +42,10 @@ function RankLogo({ rank }: { rank: 1 | 2 | 3 }) {
   );
 }
 
-export default function AwardsPage() {
-  const years = getAwardYears();
+export default async function AwardsPage() {
+  const years = await getAwardYears();
   const currentYear = years[0];
-  const currentAwards = getAwardsByYear(currentYear);
-  const productIdByWinner = new Map(getRawEvaluations().map((item) => [item.name, item.id]));
+  const currentAwards = await getAwardsByYear(currentYear);
   const topThreeAwards = currentAwards.slice(0, 3);
   const featuredAwards = currentAwards.slice(3);
 
@@ -88,7 +86,7 @@ export default function AwardsPage() {
                         <p className={styles.podiumAward}>{award.awardName}</p>
                         <div className={styles.podiumWinnerRow}>
                           <ProductLogo
-                            productId={productIdByWinner.get(award.winner) ?? ""}
+                            productId=""
                             organization={award.organization}
                             name={award.winner}
                             size="sm"
@@ -116,7 +114,7 @@ export default function AwardsPage() {
                       </div>
                       <div className={styles.awardWinnerRow}>
                         <ProductLogo
-                          productId={productIdByWinner.get(award.winner) ?? ""}
+                          productId=""
                           organization={award.organization}
                           name={award.winner}
                           size="sm"

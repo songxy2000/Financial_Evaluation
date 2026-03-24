@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import { apiPost } from "@/data/http";
 import type { ApplicationFormInput } from "@/types/application";
 import styles from "./ApplicationForm.module.css";
 
@@ -50,6 +51,13 @@ export default function ApplicationForm() {
   const [form, setForm] = useState<ApplicationFormInput>(initialData);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitResult, setSubmitResult] = useState<{
+    id: string;
+    status: string;
+    submittedAt: string;
+  } | null>(null);
 
   const onChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const target = event.target;
@@ -58,14 +66,34 @@ export default function ApplicationForm() {
 
     setForm((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
+    setSubmitError("");
   };
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors = validate(form);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
-    setSubmitted(true);
+
+    setSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const result = await apiPost<{
+        id: string;
+        status: string;
+        submittedAt: string;
+      }>("/api/v1/applications", form);
+
+      setSubmitResult(result);
+      setSubmitted(true);
+      setForm(initialData);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "提交失败，请稍后重试";
+      setSubmitError(message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -73,6 +101,11 @@ export default function ApplicationForm() {
       <div className={styles.success} role="status" aria-live="polite">
         <h3>报名提交成功</h3>
         <p>我们已收到你的报名信息，评测团队将在 2 个工作日内与你联系。</p>
+        {submitResult ? (
+          <p>
+            报名编号：<strong>{submitResult.id}</strong>
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -100,6 +133,7 @@ export default function ApplicationForm() {
             <option value="金融智能体">金融智能体</option>
             <option value="MCP">MCP</option>
             <option value="Skill">Skill</option>
+            <option value="其他">其他</option>
           </select>
           {errors.productCategory ? <span className={styles.error}>{errors.productCategory}</span> : null}
         </label>
@@ -152,8 +186,10 @@ export default function ApplicationForm() {
       </label>
       {errors.agreementAccepted ? <span className={styles.error}>{errors.agreementAccepted}</span> : null}
 
-      <button type="submit" className="btn btnPrimary">
-        提交报名
+      {submitError ? <p className={styles.error}>{submitError}</p> : null}
+
+      <button type="submit" className="btn btnPrimary" disabled={submitting}>
+        {submitting ? "提交中..." : "提交报名"}
       </button>
     </form>
   );
