@@ -1,14 +1,11 @@
 "use client";
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import EvaluationStatistics from "@/components/evaluation/EvaluationStatistics";
-import {
-  getArenaSetByCategory,
-  getArenaStoreServerSnapshot,
-  subscribeArenaStore,
-} from "@/data/arenaStorage";
+import { apiGet } from "@/data/http";
 import { sortEvaluationItems } from "@/data/evaluations";
+import type { ArenaGeneratedSet } from "@/types/arena";
 import type { EvaluationProduct, EvaluationSort, ProductCategory } from "@/types/evaluation";
 import styles from "./EvaluationsResultsClient.module.css";
 
@@ -56,20 +53,39 @@ export default function EvaluationsResultsClient({
   selectedMonth,
   currentCategory,
 }: EvaluationsResultsClientProps) {
-  const arenaStore = useSyncExternalStore(
-    subscribeArenaStore,
-    () => (allowArenaOverride ? getArenaSetByCategory(category) : null),
-    () => {
-      const store = getArenaStoreServerSnapshot();
-      return allowArenaOverride ? store[category] ?? null : null;
-    },
-  );
+  const [arenaItems, setArenaItems] = useState<
+    Array<{ id: string; overallScore: number; businessScore: number; complianceScore: number }> | null
+  >(null);
+
+  useEffect(() => {
+    let active = true;
+
+    if (!allowArenaOverride) {
+      return () => {
+        active = false;
+      };
+    }
+
+    apiGet<ArenaGeneratedSet>(`/api/v1/arena/results?category=${encodeURIComponent(category)}`)
+      .then((data) => {
+        if (!active) return;
+        setArenaItems(Array.isArray(data.items) ? data.items : null);
+      })
+      .catch(() => {
+        if (!active) return;
+        setArenaItems(null);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [allowArenaOverride, category]);
 
   const finalItems = useMemo(() => {
-    if (!arenaStore?.items?.length) return sortEvaluationItems(initialItems, sort);
-    const merged = applyOverrides(initialItems, arenaStore.items);
+    if (!allowArenaOverride || !arenaItems?.length) return sortEvaluationItems(initialItems, sort);
+    const merged = applyOverrides(initialItems, arenaItems);
     return sortEvaluationItems(merged, sort);
-  }, [arenaStore, initialItems, sort]);
+  }, [allowArenaOverride, arenaItems, initialItems, sort]);
 
   if (finalItems.length === 0) {
     return (

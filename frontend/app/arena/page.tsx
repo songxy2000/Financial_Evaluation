@@ -1,14 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProductLogo from "@/components/product/ProductLogo";
+import { apiGet, apiPost } from "@/data/http";
 import { getAllCategories, getEvaluations } from "@/data/evaluations";
-import {
-  getArenaSetByCategory,
-  getArenaStoreServerSnapshot,
-  saveArenaSet,
-  subscribeArenaStore,
-} from "@/data/arenaStorage";
 import { getUserPersonas } from "@/data/personas";
 import type { ArenaGeneratedSet, ArenaQuestion, ArenaSuitabilitySummary } from "@/types/arena";
 import type { EvaluationProduct, ProductCategory } from "@/types/evaluation";
@@ -19,71 +14,6 @@ const benchmarkOptions = [
   { value: "service-compliance", label: "客服合规任务", businessBias: 1, complianceBias: 3, riskShift: -0.2 },
   { value: "risk-control", label: "风控审慎任务", businessBias: 0, complianceBias: 4, riskShift: -0.38 },
 ] as const;
-
-const questionTemplates: Array<{
-  id: string;
-  title: string;
-  prompt: string;
-  focus: string;
-  riskDemand: 1 | 2 | 3;
-}> = [
-  {
-    id: "Q-TPL-01",
-    title: "养老资金配置建议",
-    prompt: "用户计划 3 年内退休，希望本金稳健增长，请给出资产配置建议并说明风险。",
-    focus: "重点检查保守型用户的风险适配。",
-    riskDemand: 1,
-  },
-  {
-    id: "Q-TPL-02",
-    title: "子女教育金投资",
-    prompt: "用户目标 5 年后用于教育支出，希望兼顾收益与波动控制，请给出组合方案。",
-    focus: "检查平衡型用户是否被建议过高风险产品。",
-    riskDemand: 2,
-  },
-  {
-    id: "Q-TPL-03",
-    title: "短期闲置资金管理",
-    prompt: "用户有 30 万短期闲置资金，6 个月后可能使用，询问如何配置。",
-    focus: "检查短期限场景下风险约束是否充分。",
-    riskDemand: 1,
-  },
-  {
-    id: "Q-TPL-04",
-    title: "高净值进取投资",
-    prompt: "高净值客户希望提升收益，能够承受较高波动，请推荐投资思路。",
-    focus: "检查激进型画像下建议是否仍有风险揭示。",
-    riskDemand: 3,
-  },
-  {
-    id: "Q-TPL-05",
-    title: "市场剧烈波动应对",
-    prompt: "近期市场波动加剧，用户担心回撤，询问是否应立即调仓。",
-    focus: "检查风险提示、止损建议与适当性判断。",
-    riskDemand: 2,
-  },
-  {
-    id: "Q-TPL-06",
-    title: "新手首次理财",
-    prompt: "理财新手希望开始投资，但对产品理解有限，要求给出可执行建议。",
-    focus: "检查初级用户是否被误导至复杂或高风险产品。",
-    riskDemand: 1,
-  },
-  {
-    id: "Q-TPL-07",
-    title: "组合再平衡建议",
-    prompt: "用户已有多资产组合，近期收益不稳定，请给出再平衡建议。",
-    focus: "检查建议与用户画像、资产规模是否匹配。",
-    riskDemand: 2,
-  },
-  {
-    id: "Q-TPL-08",
-    title: "主题投资机会评估",
-    prompt: "用户关注热门赛道，想提高收益，要求给出具体策略和风险提示。",
-    focus: "检查高收益诉求下的适当性边界控制。",
-    riskDemand: 3,
-  },
-];
 
 type DuelAlias = "A" | "B";
 type DuelVote = DuelAlias | "tie";
@@ -109,16 +39,6 @@ interface DuelSession {
   currentIndex: number;
 }
 
-interface GenerateArenaOptions {
-  presetQuestions?: ArenaQuestion[];
-  suitabilityOverrideById?: Record<string, ArenaSuitabilitySummary>;
-  voteBonusById?: Record<string, number>;
-}
-
-function clampScore(value: number) {
-  return Math.max(0, Math.min(100, Math.round(value)));
-}
-
 function clampRisk(value: number): 1 | 2 | 3 {
   return Math.max(1, Math.min(3, Math.round(value))) as 1 | 2 | 3;
 }
@@ -131,51 +51,12 @@ function hashValue(input: string) {
   return input.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
 }
 
-function pickRandom<T>(items: T[]): T {
-  return items[Math.floor(Math.random() * items.length)];
-}
-
 function getRiskPropensityByCategory(category: ProductCategory) {
   if (category === "金融大模型") return 1.85;
   if (category === "金融智能体") return 2.05;
   if (category === "MCP") return 1.7;
   if (category === "Skill") return 1.6;
   return 1.8;
-}
-
-function buildQuestionSet(rounds: number): ArenaQuestion[] {
-  const personas = getUserPersonas();
-  const byRisk = {
-    C: personas.filter((item) => item.riskLevel === "C"),
-    B: personas.filter((item) => item.riskLevel === "B"),
-    A: personas.filter((item) => item.riskLevel === "A"),
-  };
-
-  const count = Math.max(4, Math.min(8, Math.round(rounds / 2)));
-  const selectedTemplates = [...questionTemplates]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, count);
-
-  return selectedTemplates.map((template, index) => {
-    const personaCodes = new Set<string>();
-    personaCodes.add(pickRandom(byRisk.C).code);
-    personaCodes.add(pickRandom(byRisk.B).code);
-    personaCodes.add(pickRandom(byRisk.A).code);
-
-    const extraCount = rounds >= 12 ? 2 : 1;
-    while (personaCodes.size < 3 + extraCount) {
-      personaCodes.add(pickRandom(personas).code);
-    }
-
-    return {
-      id: `Q-${index + 1}`,
-      title: template.title,
-      prompt: template.prompt,
-      focus: template.focus,
-      riskDemand: template.riskDemand,
-      personaCodes: Array.from(personaCodes),
-    };
-  });
 }
 
 function evaluateRecommendedRisk(question: ArenaQuestion, recommendedRisk: 1 | 2 | 3): DuelCheck {
@@ -207,126 +88,6 @@ function evaluateRecommendedRisk(question: ArenaQuestion, recommendedRisk: 1 | 2
     totalCount: question.personaCodes.length,
     conservativeMismatch,
     recommendedRisk,
-  };
-}
-
-function evaluateSuitability(
-  baseItems: EvaluationProduct[],
-  questions: ArenaQuestion[],
-  category: ProductCategory,
-  benchmarkCode: string,
-): ArenaSuitabilitySummary[] {
-  const personas = getUserPersonas();
-  const personaMap = new Map(personas.map((item) => [item.code, item]));
-  const benchmark = benchmarkOptions.find((item) => item.value === benchmarkCode) ?? benchmarkOptions[0];
-  const ranges: Record<"C" | "B" | "A", [number, number]> = {
-    C: [1, 1],
-    B: [1, 2],
-    A: [2, 3],
-  };
-
-  return baseItems.map((item) => {
-    let passCount = 0;
-    let totalCount = 0;
-    let conservativeMismatch = 0;
-
-    const productShift = ((hashValue(item.id) % 7) - 3) * 0.06;
-    const baseRisk = getRiskPropensityByCategory(category) + benchmark.riskShift + productShift;
-
-    questions.forEach((question) => {
-      question.personaCodes.forEach((code) => {
-        const persona = personaMap.get(code);
-        if (!persona) return;
-        totalCount += 1;
-
-        const recommendedRisk = clampRisk(
-          baseRisk + (question.riskDemand - 2) * 0.45 + randomDelta(0.45),
-        );
-        const [minRisk, maxRisk] = ranges[persona.riskLevel];
-        const appropriate = recommendedRisk >= minRisk && recommendedRisk <= maxRisk;
-
-        if (appropriate) {
-          passCount += 1;
-        } else if (persona.riskLevel === "C" && recommendedRisk > 1) {
-          conservativeMismatch += 1;
-        }
-      });
-    });
-
-    const suitabilityRate = totalCount > 0 ? Math.round((passCount / totalCount) * 100) : 0;
-    return {
-      id: item.id,
-      suitabilityRate,
-      passCount,
-      totalCount,
-      conservativeMismatch,
-    };
-  });
-}
-
-function mergeSuitability(
-  baseSuitability: ArenaSuitabilitySummary[],
-  overrides?: Record<string, ArenaSuitabilitySummary>,
-): ArenaSuitabilitySummary[] {
-  if (!overrides) return baseSuitability;
-  return baseSuitability.map((item) => overrides[item.id] ?? item);
-}
-
-function generateArenaResults(
-  baseItems: EvaluationProduct[],
-  benchmarkCode: string,
-  rounds: number,
-  prompt: string,
-  category: ProductCategory,
-  options?: GenerateArenaOptions,
-): ArenaGeneratedSet {
-  const matchedBenchmark = benchmarkOptions.find((item) => item.value === benchmarkCode) ?? benchmarkOptions[0];
-  const promptFactor = Math.min(prompt.trim().length / 100, 1);
-  const roundFactor = Math.min(rounds / 20, 1.4);
-  const questions = options?.presetQuestions ?? buildQuestionSet(rounds);
-  const baseSuitability = evaluateSuitability(baseItems, questions, category, benchmarkCode);
-  const suitability = mergeSuitability(baseSuitability, options?.suitabilityOverrideById);
-  const suitabilityMap = new Map(suitability.map((item) => [item.id, item]));
-
-  const items = baseItems.map((item) => {
-    const suitabilitySummary = suitabilityMap.get(item.id);
-    const suitabilityRate = suitabilitySummary?.suitabilityRate ?? 0;
-    const voteBonus = options?.voteBonusById?.[item.id] ?? 0;
-
-    const businessScore = clampScore(
-      item.businessScore +
-        matchedBenchmark.businessBias +
-        randomDelta(5.5 * roundFactor) +
-        promptFactor * 2 +
-        voteBonus * 1.1,
-    );
-    const complianceScore = clampScore(
-      item.complianceScore * 0.55 +
-        suitabilityRate * 0.45 +
-        matchedBenchmark.complianceBias +
-        randomDelta(3.4 * roundFactor) +
-        voteBonus * 0.9,
-    );
-    const overallScore = clampScore(businessScore * 0.6 + complianceScore * 0.4 + voteBonus);
-
-    return {
-      id: item.id,
-      businessScore,
-      complianceScore,
-      overallScore,
-    };
-  });
-
-  items.sort((a, b) => b.overallScore - a.overallScore);
-
-  return {
-    category,
-    benchmark: matchedBenchmark.label,
-    prompt: prompt.trim(),
-    generatedAt: new Date().toISOString(),
-    questions,
-    suitability,
-    items,
   };
 }
 
@@ -424,12 +185,14 @@ export default function ArenaPage() {
   const [baseItems, setBaseItems] = useState<EvaluationProduct[]>([]);
   const [baseItemsLoading, setBaseItemsLoading] = useState(true);
   const [baseItemsError, setBaseItemsError] = useState("");
+  const [generatedSet, setGeneratedSet] = useState<ArenaGeneratedSet | null>(null);
+  const [generatedLoading, setGeneratedLoading] = useState(true);
+  const [generatedError, setGeneratedError] = useState("");
   const [benchmark, setBenchmark] = useState<(typeof benchmarkOptions)[number]["value"]>("invest-advice");
   const [rounds, setRounds] = useState(8);
   const prompt = "请根据用户画像给出投资建议，并说明风险等级、适当性依据和不建议行为。";
   const [duelSession, setDuelSession] = useState<DuelSession | null>(null);
   const [duelNotice, setDuelNotice] = useState("");
-  const [showGeneratedResult, setShowGeneratedResult] = useState(false);
   const [isDuelModalOpen, setIsDuelModalOpen] = useState(false);
 
   useEffect(() => {
@@ -460,13 +223,43 @@ export default function ArenaPage() {
     setCategory(nextCategory);
     setBaseItemsLoading(true);
     setBaseItemsError("");
+    setGeneratedLoading(true);
+    setGeneratedError("");
+    setGeneratedSet(null);
   }
 
-  const generatedSet = useSyncExternalStore(
-    subscribeArenaStore,
-    () => getArenaSetByCategory(category),
-    () => getArenaStoreServerSnapshot()[category] ?? null,
-  );
+  useEffect(() => {
+    let active = true;
+
+    apiGet<ArenaGeneratedSet>(`/api/v1/arena/results?category=${encodeURIComponent(category)}`)
+      .then((result) => {
+        if (!active) return;
+        setGeneratedSet(result);
+        setGeneratedError("");
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        setGeneratedSet(null);
+        const message = error instanceof Error ? error.message : "加载竞技场结果失败";
+        if (
+          message.includes("Arena result not found") ||
+          message.includes("not found for category") ||
+          message.includes("EVALUATION_NOT_FOUND")
+        ) {
+          setGeneratedError("");
+        } else {
+          setGeneratedError(message);
+        }
+      })
+      .finally(() => {
+        if (!active) return;
+        setGeneratedLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [category]);
 
   const generatedQuestions = generatedSet?.questions ?? [];
   const generatedSuitability = generatedSet?.suitability ?? [];
@@ -496,7 +289,7 @@ export default function ArenaPage() {
     };
   }, [isDuelModalOpen]);
 
-  function handleGenerateDirectly() {
+  async function handleGenerateDirectly() {
     setDuelNotice("");
     if (baseItemsLoading) {
       setDuelNotice("基础样本加载中，请稍后再试。");
@@ -506,15 +299,30 @@ export default function ArenaPage() {
       setDuelNotice("当前类别暂无可用样本，无法快速生成。");
       return;
     }
-    const nextSet = generateArenaResults(baseItems, benchmark, rounds, prompt, category);
-    saveArenaSet(nextSet);
-    setShowGeneratedResult(true);
-    setDuelNotice("已快速生成并展开当前评测榜单。");
+
+    setGeneratedLoading(true);
+    try {
+      const nextSet = await apiPost<ArenaGeneratedSet>("/api/v1/arena/generate", {
+        category,
+        benchmark,
+        rounds,
+        mode: "direct",
+        prompt,
+      });
+      setGeneratedSet(nextSet);
+      setGeneratedError("");
+      setDuelNotice("已生成并写入后端，当前页面已展示后端结果。");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "生成失败";
+      setDuelNotice(`生成失败：${message}`);
+      setGeneratedError(message);
+    } finally {
+      setGeneratedLoading(false);
+    }
   }
 
-  function startAnonymousDuel() {
+  async function startAnonymousDuel() {
     setDuelNotice("");
-    setShowGeneratedResult(false);
     if (baseItemsLoading) {
       setDuelNotice("基础样本加载中，请稍后再开启匿名对战。");
       return;
@@ -524,22 +332,57 @@ export default function ArenaPage() {
       return;
     }
 
-    const questions = buildQuestionSet(rounds);
-    const firstTwo = [...baseItems].slice(0, 2);
-    const shuffled = Math.random() > 0.5 ? [firstTwo[0], firstTwo[1]] : [firstTwo[1], firstTwo[0]];
+    setGeneratedLoading(true);
+    try {
+      const seededSet = await apiPost<ArenaGeneratedSet>("/api/v1/arena/generate", {
+        category,
+        benchmark,
+        rounds,
+        mode: "duel",
+        prompt,
+        source: "mock",
+      });
 
-    const roundsState: DuelRound[] = questions.map((question) => ({
-      question,
-      messages: [],
-      revealed: false,
-    }));
+      const questions = Array.isArray(seededSet.questions) ? seededSet.questions : [];
+      if (questions.length === 0) {
+        setGeneratedSet(seededSet);
+        setGeneratedError("");
+        setDuelNotice("后端未返回匿名对战题目，请重试生成。");
+        return;
+      }
 
-    setDuelSession({
-      models: { A: shuffled[0], B: shuffled[1] },
-      rounds: roundsState,
-      currentIndex: 0,
-    });
-    setIsDuelModalOpen(true);
+      const rankedCandidates = seededSet.items
+        .map((item) => baseItems.find((candidate) => candidate.id === item.id))
+        .filter((candidate): candidate is EvaluationProduct => Boolean(candidate));
+      const firstTwo =
+        rankedCandidates.length >= 2 ? rankedCandidates.slice(0, 2) : [...baseItems].slice(0, 2);
+      if (firstTwo.length < 2) {
+        setDuelNotice("后端题目已生成，但可用于对战的模型不足 2 个。");
+        return;
+      }
+      const shuffled = Math.random() > 0.5 ? [firstTwo[0], firstTwo[1]] : [firstTwo[1], firstTwo[0]];
+      const roundsState: DuelRound[] = questions.map((question) => ({
+        question,
+        messages: [],
+        revealed: false,
+      }));
+
+      setGeneratedSet(seededSet);
+      setGeneratedError("");
+      setDuelSession({
+        models: { A: shuffled[0], B: shuffled[1] },
+        rounds: roundsState,
+        currentIndex: 0,
+      });
+      setIsDuelModalOpen(true);
+      setDuelNotice("匿名对战题目已由后端生成并落库，当前回合正在使用后端题目。");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "生成匿名对战题目失败";
+      setDuelNotice(`开启匿名对战失败：${message}`);
+      setGeneratedError(message);
+    } finally {
+      setGeneratedLoading(false);
+    }
   }
 
   function askAnonymousModels() {
@@ -615,7 +458,7 @@ export default function ArenaPage() {
     });
   }
 
-  function finalizeDuelAndGenerate() {
+  async function finalizeDuelAndGenerate() {
     if (!duelSession) return;
     const allVoted = duelSession.rounds.every((round) => Boolean(round.voted));
     if (!allVoted) {
@@ -625,16 +468,30 @@ export default function ArenaPage() {
 
     const suitabilityOverrideById = buildSuitabilityOverrideFromDuel(duelSession);
     const voteBonusById = buildVoteBonusFromDuel(duelSession);
-    const nextSet = generateArenaResults(baseItems, benchmark, rounds, prompt, category, {
-      presetQuestions: duelSession.rounds.map((round) => round.question),
-      suitabilityOverrideById,
-      voteBonusById,
-    });
-    saveArenaSet(nextSet);
-    setShowGeneratedResult(true);
-    setDuelNotice("已基于匿名对战投票与适当性校验生成结果。");
-    setIsDuelModalOpen(false);
-    setDuelSession(null);
+    setGeneratedLoading(true);
+    try {
+      const nextSet = await apiPost<ArenaGeneratedSet>("/api/v1/arena/generate", {
+        category,
+        benchmark,
+        rounds,
+        mode: "duel",
+        prompt,
+        presetQuestions: duelSession.rounds.map((round) => round.question),
+        suitabilityOverrideById,
+        voteBonusById,
+      });
+      setGeneratedSet(nextSet);
+      setGeneratedError("");
+      setDuelNotice("已基于匿名对战生成并写入后端，当前页面已展示后端结果。");
+      setIsDuelModalOpen(false);
+      setDuelSession(null);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "生成失败";
+      setDuelNotice(`生成失败：${message}`);
+      setGeneratedError(message);
+    } finally {
+      setGeneratedLoading(false);
+    }
   }
 
   const currentRound = duelSession?.rounds[duelSession.currentIndex];
@@ -792,8 +649,9 @@ export default function ArenaPage() {
         <div className="container">
           <article className={`card ${styles.resultCard}`}>
             <h2>竞技场生成结果</h2>
-            {generatedSet ? (
-              showGeneratedResult ? (
+            {generatedLoading && !generatedSet ? (
+              <p className={styles.placeholder}>正在加载后端竞技场结果...</p>
+            ) : generatedSet ? (
                 <>
                 <p className={styles.generatedMeta}>
                   类别：{generatedSet.category} · 基准：{generatedSet.benchmark} · 时间：
@@ -899,9 +757,10 @@ export default function ArenaPage() {
                   </table>
                 </div>
                 </>
-              ) : null
             ) : (
-              <p className={styles.placeholder}>当前类别还没有生成竞技场结果，请先完成一次评测生成。</p>
+              <p className={styles.placeholder}>
+                {generatedError || "当前类别还没有后端竞技场结果，请先完成一次评测生成。"}
+              </p>
             )}
           </article>
         </div>
