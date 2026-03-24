@@ -9,20 +9,21 @@
     "db:init": "npm run build && node dist/db/init.js",
     "db:seed": "npm run build && node dist/db/seed.js",
     "db:reset": "npm run build && node dist/db/reset.js",
-    "crawl:run": "npm run build && node dist/jobs/process-crawl-tasks.js"
+    "crawl:run": "npm run build && node dist/jobs/process-crawl-tasks.js",
+    "smoke:api": "node scripts/smoke-api.mjs"
   },
   "dependencies": {
-    "better-sqlite3": "^11.9.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
+    "pg": "^8.16.3",
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.12",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.10",
+    "@types/pg": "^8.15.5",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   }

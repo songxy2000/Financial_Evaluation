@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
-import { db } from "../db/client";
-import { ApiError } from "../utils/http";
+import { query } from "../db/client";
+import { ApiError, asyncHandler } from "../utils/http";
 import { parseJsonArray } from "../utils/json";
 
 const productCategorySchema = z.enum(["金融大模型", "金融智能体", "MCP", "Skill", "其他"]);
@@ -27,18 +27,18 @@ function monthLabel(month: string): string {
   return `${year}年${Number(m)}月`;
 }
 
-function readMonths(): string[] {
-  const rows = db
-    .prepare(`SELECT DISTINCT month FROM evaluation_records ORDER BY month DESC`)
-    .all() as Array<{ month: string }>;
-  return rows.map((r) => r.month);
+async function readMonths(): Promise<string[]> {
+  const rows = await query<{ month: string }>(
+    `SELECT DISTINCT month FROM evaluation_records ORDER BY month DESC`,
+  );
+  return rows.rows.map((r) => r.month);
 }
 
-function readCategories(): string[] {
-  const rows = db
-    .prepare(`SELECT DISTINCT category FROM evaluation_records ORDER BY category ASC`)
-    .all() as Array<{ category: string }>;
-  return rows.map((r) => r.category);
+async function readCategories(): Promise<string[]> {
+  const rows = await query<{ category: string }>(
+    `SELECT DISTINCT category FROM evaluation_records ORDER BY category ASC`,
+  );
+  return rows.rows.map((r) => r.category);
 }
 
 function parseEvaluationRow(row: any) {
@@ -53,10 +53,10 @@ function parseEvaluationRow(row: any) {
     subCategory: row.sub_category,
     summary: row.summary,
     status: row.status,
-    year: row.year,
-    overallScore: row.overall_score,
-    businessScore: row.business_score,
-    complianceScore: row.compliance_score,
+    year: Number(row.year),
+    overallScore: Number(row.overall_score),
+    businessScore: Number(row.business_score),
+    complianceScore: Number(row.compliance_score),
     awardTags: parseJsonArray<string[]>(row.award_tags_json, []),
     certificationLevel: row.certification_level,
     scenarios: parseJsonArray<string[]>(row.scenarios_json, []),
@@ -67,131 +67,136 @@ function parseEvaluationRow(row: any) {
     personaFits: parseJsonArray(row.persona_fits_json, []),
     dataSource: row.data_source,
     importBatchId: row.import_batch_id,
-    revision: row.revision,
+    revision: Number(row.revision),
   };
 }
 
 export const evaluationsRouter = Router();
 
-evaluationsRouter.get("/meta/categories", (_req, res) => {
-  res.json({ categories: readCategories() });
-});
+evaluationsRouter.get(
+  "/meta/categories",
+  asyncHandler(async (_req, res) => {
+    res.json({ categories: await readCategories() });
+  }),
+);
 
-evaluationsRouter.get("/", (req, res) => {
-  const parsed = listQuerySchema.safeParse(req.query);
-  if (!parsed.success) {
-    throw new ApiError(400, "INVALID_QUERY", parsed.error.issues[0]?.message ?? "Invalid query");
-  }
+evaluationsRouter.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const parsed = listQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      throw new ApiError(400, "INVALID_QUERY", parsed.error.issues[0]?.message ?? "Invalid query");
+    }
 
-  const query = parsed.data;
-  const months = readMonths();
-  const effectiveMonth = query.month ?? months[0];
-  if (!effectiveMonth) {
-    res.json({
-      items: [],
-      paging: { page: 1, pageSize: 20, total: 0 },
-      meta: { month: "", monthLabel: "", categories: [], rankingMonths: [] },
-    });
-    return;
-  }
+    const userQuery = parsed.data;
+    const months = await readMonths();
+    const effectiveMonth = userQuery.month ?? months[0];
+    if (!effectiveMonth) {
+      res.json({
+        items: [],
+        paging: { page: 1, pageSize: 20, total: 0 },
+        meta: { month: "", monthLabel: "", categories: [], rankingMonths: [] },
+      });
+      return;
+    }
 
-  const sort = query.sort ?? "overall";
-  const page = query.page ?? 1;
-  const pageSize = query.pageSize ?? 20;
-  const award = query.award ?? "all";
+    const sort = userQuery.sort ?? "overall";
+    const page = userQuery.page ?? 1;
+    const pageSize = userQuery.pageSize ?? 20;
+    const award = userQuery.award ?? "all";
+    const offset = (page - 1) * pageSize;
 
-  const where: string[] = ["month = ?"];
-  const params: Array<string | number> = [effectiveMonth];
+    const values: unknown[] = [];
+    const bind = (value: unknown) => {
+      values.push(value);
+      return `$${values.length}`;
+    };
 
-  if (query.category) {
-    where.push("category = ?");
-    params.push(query.category);
-  }
-  if (query.status && query.status !== "全部") {
-    where.push("status = ?");
-    params.push(query.status);
-  }
-  if (query.source) {
-    where.push("data_source = ?");
-    params.push(query.source);
-  }
-  if (award === "yes") {
-    where.push("award_tags_json != '[]'");
-  }
-  if (query.scenario) {
-    where.push("scenarios_json LIKE ?");
-    params.push(`%${query.scenario}%`);
-  }
-  if (query.q) {
-    where.push("(name LIKE ? OR organization LIKE ? OR summary LIKE ?)");
-    const kw = `%${query.q}%`;
-    params.push(kw, kw, kw);
-  }
+    const where: string[] = [`month = ${bind(effectiveMonth)}`];
+    if (userQuery.category) {
+      where.push(`category = ${bind(userQuery.category)}`);
+    }
+    if (userQuery.status && userQuery.status !== "全部") {
+      where.push(`status = ${bind(userQuery.status)}`);
+    }
+    if (userQuery.source) {
+      where.push(`data_source = ${bind(userQuery.source)}`);
+    }
+    if (award === "yes") {
+      where.push(`jsonb_array_length(award_tags_json) > 0`);
+    }
+    if (userQuery.scenario) {
+      where.push(`scenarios_json::text ILIKE ${bind(`%${userQuery.scenario}%`)}`);
+    }
+    if (userQuery.q) {
+      const keyword = `%${userQuery.q}%`;
+      where.push(`(name ILIKE ${bind(keyword)} OR organization ILIKE ${bind(keyword)} OR summary ILIKE ${bind(keyword)})`);
+    }
 
-  const orderByMap: Record<string, string> = {
-    overall: "overall_score DESC, report_updated_at DESC, id ASC",
-    business: "business_score DESC, report_updated_at DESC, id ASC",
-    compliance: "compliance_score DESC, report_updated_at DESC, id ASC",
-    updated: "report_updated_at DESC, overall_score DESC, id ASC",
-  };
+    const whereSql = `WHERE ${where.join(" AND ")}`;
+    const orderByMap: Record<string, string> = {
+      overall: "overall_score DESC, report_updated_at DESC, id ASC",
+      business: "business_score DESC, report_updated_at DESC, id ASC",
+      compliance: "compliance_score DESC, report_updated_at DESC, id ASC",
+      updated: "report_updated_at DESC, overall_score DESC, id ASC",
+    };
 
-  const whereSql = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
-  const offset = (page - 1) * pageSize;
-
-  const totalRow = db
-    .prepare(`SELECT COUNT(*) AS total FROM evaluation_records ${whereSql}`)
-    .get(...params) as { total: number };
-
-  const rows = db
-    .prepare(
+    const totalRows = await query<{ total: string }>(
+      `SELECT COUNT(*)::text AS total FROM evaluation_records ${whereSql}`,
+      values,
+    );
+    const listValues = [...values, pageSize, offset];
+    const rows = await query(
       `
       SELECT *
       FROM evaluation_records
       ${whereSql}
       ORDER BY ${orderByMap[sort]}
-      LIMIT ? OFFSET ?
+      LIMIT $${listValues.length - 1} OFFSET $${listValues.length}
     `,
-    )
-    .all(...params, pageSize, offset);
+      listValues,
+    );
 
-  const items = rows.map(parseEvaluationRow);
-  const categories = readCategories();
-  const rankingMonths = months.map((m) => ({ value: m, label: monthLabel(m) }));
+    const items = rows.rows.map(parseEvaluationRow);
+    const categories = await readCategories();
+    const rankingMonths = months.map((m) => ({ value: m, label: monthLabel(m) }));
 
-  res.json({
-    items,
-    paging: {
-      page,
-      pageSize,
-      total: totalRow.total,
-    },
-    meta: {
-      month: effectiveMonth,
-      monthLabel: monthLabel(effectiveMonth),
-      categories,
-      rankingMonths,
-    },
-  });
-});
+    res.json({
+      items,
+      paging: {
+        page,
+        pageSize,
+        total: Number(totalRows.rows[0]?.total ?? 0),
+      },
+      meta: {
+        month: effectiveMonth,
+        monthLabel: monthLabel(effectiveMonth),
+        categories,
+        rankingMonths,
+      },
+    });
+  }),
+);
 
-evaluationsRouter.get("/:slug", (req, res) => {
-  const slug = req.params.slug;
-  const month = typeof req.query.month === "string" ? req.query.month : readMonths()[0];
-  const source = typeof req.query.source === "string" ? req.query.source : undefined;
+evaluationsRouter.get(
+  "/:slug",
+  asyncHandler(async (req, res) => {
+    const slug = req.params.slug;
+    const month = typeof req.query.month === "string" ? req.query.month : (await readMonths())[0];
+    const source = typeof req.query.source === "string" ? req.query.source : undefined;
 
-  if (!month) {
-    throw new ApiError(404, "EVALUATION_NOT_FOUND", "No evaluation data available");
-  }
+    if (!month) {
+      throw new ApiError(404, "EVALUATION_NOT_FOUND", "No evaluation data available");
+    }
 
-  const where = ["slug = ?", "month = ?"];
-  const params: Array<string> = [slug, month];
-  if (source) {
-    where.push("data_source = ?");
-    params.push(source);
-  }
+    const values: unknown[] = [slug, month];
+    const where = ["slug = $1", "month = $2"];
+    if (source) {
+      values.push(source);
+      where.push(`data_source = $${values.length}`);
+    }
 
-  const row = db
-    .prepare(
+    const rows = await query(
       `
       SELECT *
       FROM evaluation_records
@@ -199,13 +204,15 @@ evaluationsRouter.get("/:slug", (req, res) => {
       ORDER BY revision DESC
       LIMIT 1
     `,
-    )
-    .get(...params);
+      values,
+    );
 
-  if (!row) {
-    throw new ApiError(404, "EVALUATION_NOT_FOUND", `Evaluation not found for slug=${slug}`);
-  }
+    const row = rows.rows[0];
+    if (!row) {
+      throw new ApiError(404, "EVALUATION_NOT_FOUND", `Evaluation not found for slug=${slug}`);
+    }
 
-  res.json(parseEvaluationRow(row));
-});
+    res.json(parseEvaluationRow(row));
+  }),
+);
 

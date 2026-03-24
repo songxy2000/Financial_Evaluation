@@ -1,49 +1,47 @@
 import { Router } from "express";
 import { z } from "zod";
-import { db } from "../db/client";
+import { query } from "../db/client";
+import { asyncHandler } from "../utils/http";
 
 export const awardsRouter = Router();
 
-awardsRouter.get("/years", (_req, res) => {
-  const rows = db
-    .prepare(`SELECT DISTINCT year FROM awards ORDER BY year DESC`)
-    .all() as Array<{ year: number }>;
+awardsRouter.get(
+  "/years",
+  asyncHandler(async (_req, res) => {
+    const rows = await query<{ year: number }>(`SELECT DISTINCT year FROM awards ORDER BY year DESC`);
+    res.json({ years: rows.rows.map((r) => Number(r.year)) });
+  }),
+);
 
-  res.json({ years: rows.map((r) => r.year) });
-});
+awardsRouter.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const querySchema = z.object({ year: z.coerce.number().int().optional() });
+    const parsed = querySchema.safeParse(req.query);
 
-awardsRouter.get("/", (req, res) => {
-  const querySchema = z.object({
-    year: z.coerce.number().int().optional(),
-  });
-  const parsed = querySchema.safeParse(req.query);
+    const years = await query<{ year: number }>(`SELECT DISTINCT year FROM awards ORDER BY year DESC`);
+    const latestYear = years.rows[0]?.year;
+    const year = parsed.success ? parsed.data.year ?? latestYear : latestYear;
 
-  const years = db
-    .prepare(`SELECT DISTINCT year FROM awards ORDER BY year DESC`)
-    .all() as Array<{ year: number }>;
+    if (!year) {
+      res.json({ year: null, items: [] });
+      return;
+    }
 
-  const latestYear = years[0]?.year;
-  const year = parsed.success ? parsed.data.year ?? latestYear : latestYear;
-
-  if (!year) {
-    res.json({ year: null, items: [] });
-    return;
-  }
-
-  const items = db
-    .prepare(
+    const items = await query(
       `
-      SELECT year, award_name AS awardName, winner, organization, category
+      SELECT year, award_name AS "awardName", winner, organization, category
       FROM awards
-      WHERE year = ?
+      WHERE year = $1
       ORDER BY award_name ASC
     `,
-    )
-    .all(year);
+      [year],
+    );
 
-  res.json({
-    year,
-    displayYearLabel: `${year} 年度获奖名单`,
-    items,
-  });
-});
+    res.json({
+      year,
+      displayYearLabel: `${year} 年度获奖名单`,
+      items: items.rows,
+    });
+  }),
+);

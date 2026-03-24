@@ -1,14 +1,34 @@
-import fs from "fs";
-import path from "path";
-import Database from "better-sqlite3";
+import { Pool, type PoolClient, type QueryResult, type QueryResultRow } from "pg";
 import { config } from "../config";
 
-const dbDir = path.dirname(config.dbPath);
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+export const pool = new Pool({
+  connectionString: config.databaseUrl,
+  ssl: config.pgSsl ? { rejectUnauthorized: false } : undefined,
+});
+
+export async function query<T extends QueryResultRow = QueryResultRow>(
+  text: string,
+  values: unknown[] = [],
+): Promise<QueryResult<T>> {
+  return pool.query<T>(text, values);
 }
 
-export const db = new Database(config.dbPath);
-db.pragma("journal_mode = WAL");
-db.pragma("foreign_keys = ON");
+export async function withTransaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await fn(client);
+    await client.query("COMMIT");
+    return result;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function closeDb(): Promise<void> {
+  await pool.end();
+}
 

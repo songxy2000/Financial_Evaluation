@@ -1,4 +1,3 @@
-import path from "path";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -11,6 +10,8 @@ if (!Number.isFinite(port) || port <= 0) {
 
 export const config = {
   port,
-  dbPath: path.resolve(process.cwd(), process.env.DB_PATH ?? "./data/backend.db"),
+  databaseUrl:
+    process.env.DATABASE_URL ?? "postgresql://postgres:postgres@127.0.0.1:5432/financial_ai_eval",
+  pgSsl: process.env.PGSSL === "true",
   timezone: "Asia/Shanghai",
 };

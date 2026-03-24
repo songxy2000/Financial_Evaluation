@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { db } from "./client";
+import { closeDb, query, withTransaction } from "./client";
 import { initDb } from "./init";
 import { ProductCategory } from "../types/domain";
 
@@ -300,200 +300,223 @@ function personaFits() {
   ];
 }
 
-export function seedDb(): void {
-  initDb();
-
-  db.exec(`
-    DELETE FROM evaluation_records;
-    DELETE FROM awards;
-    DELETE FROM applications;
-    DELETE FROM arena_result_sets;
-    DELETE FROM media_assets;
-    DELETE FROM media_crawl_tasks;
-    DELETE FROM ingest_batches;
-  `);
+export async function seedDb(): Promise<void> {
+  await initDb();
 
   const now = new Date().toISOString();
   const mockBatchId = `batch_mock_seed_${Date.now()}`;
+  let insertedEvaluationCount = 0;
 
-  db.prepare(
-    `
-    INSERT INTO ingest_batches (id, batch_type, source, status, total_count, success_count, failed_count, message, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-  ).run(mockBatchId, "seed", "mock", "success", 0, 0, 0, "Mock seed bootstrap", now);
+  await withTransaction(async (client) => {
+    await client.query(`
+      DELETE FROM evaluation_records;
+      DELETE FROM awards;
+      DELETE FROM applications;
+      DELETE FROM arena_result_sets;
+      DELETE FROM media_assets;
+      DELETE FROM media_crawl_tasks;
+      DELETE FROM ingest_batches;
+    `);
 
-  const insertEvaluation = db.prepare(
-    `
-    INSERT INTO evaluation_records (
-      id, slug, name, organization, product_logo_url, organization_logo_url, category, sub_category, summary, status,
-      year, month, overall_score, business_score, compliance_score, award_tags_json, certification_level, scenarios_json,
-      highlights_json, risks_json, report_updated_at, score_breakdown_json, persona_fits_json, data_source, import_batch_id,
-      revision, created_at, updated_at
-    ) VALUES (
-      @id, @slug, @name, @organization, @productLogoUrl, @organizationLogoUrl, @category, @subCategory, @summary, @status,
-      @year, @month, @overallScore, @businessScore, @complianceScore, @awardTagsJson, @certificationLevel, @scenariosJson,
-      @highlightsJson, @risksJson, @reportUpdatedAt, @scoreBreakdownJson, @personaFitsJson, @dataSource, @importBatchId,
-      @revision, @createdAt, @updatedAt
-    )
-  `,
-  );
+    await client.query(
+      `
+      INSERT INTO ingest_batches (id, batch_type, source, status, total_count, success_count, failed_count, message, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `,
+      [mockBatchId, "seed", "mock", "success", 0, 0, 0, "Mock seed bootstrap", now],
+    );
 
-  const insertArena = db.prepare(
-    `
-    INSERT INTO arena_result_sets (
-      id, category, generated_at, benchmark, prompt, questions_json, suitability_json, items_json, data_source, import_batch_id, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-  );
+    for (const month of months) {
+      const delta = monthDelta[month];
+      const year = Number(month.slice(0, 4));
 
-  const rows: number[] = [];
-  for (const month of months) {
-    const delta = monthDelta[month];
-    const year = Number(month.slice(0, 4));
+      for (const [idx, p] of baseProducts.entries()) {
+        const overall = clamp(p.baseOverall + delta + (idx % 3 === 0 ? 1 : 0));
+        const business = clamp(p.baseBusiness + delta);
+        const compliance = clamp(p.baseCompliance + delta + (idx % 4 === 0 ? 1 : 0));
+        const reportDay = String(12 + (idx % 10)).padStart(2, "0");
 
-    for (const [idx, p] of baseProducts.entries()) {
-      const overall = clamp(p.baseOverall + delta + (idx % 3 === 0 ? 1 : 0));
-      const business = clamp(p.baseBusiness + delta);
-      const compliance = clamp(p.baseCompliance + delta + (idx % 4 === 0 ? 1 : 0));
-      const reportDay = String(12 + (idx % 10)).padStart(2, "0");
+        const status =
+          month === "2026-03" && p.id === "eva-009"
+            ? "评测中"
+            : month === "2026-03" && p.id === "eva-008"
+              ? "即将发布"
+              : "已评测";
 
-      const status =
-        month === "2026-03" && p.id === "eva-009"
-          ? "评测中"
-          : month === "2026-03" && p.id === "eva-008"
-            ? "即将发布"
-            : "已评测";
-
-      insertEvaluation.run({
-        id: p.id,
-        slug: p.slug,
-        name: p.name,
-        organization: p.organization,
-        productLogoUrl: p.productLogoUrl ?? null,
-        organizationLogoUrl: p.organizationLogoUrl ?? null,
-        category: p.category,
-        subCategory: p.subCategory,
-        summary: p.summary,
-        status,
-        year,
-        month,
-        overallScore: overall,
-        businessScore: business,
-        complianceScore: compliance,
-        awardTagsJson: JSON.stringify(p.awardTags),
-        certificationLevel: p.certificationLevel,
-        scenariosJson: JSON.stringify(p.scenarios),
-        highlightsJson: JSON.stringify(p.highlights),
-        risksJson: JSON.stringify(p.risks),
-        reportUpdatedAt: `${month}-${reportDay}`,
-        scoreBreakdownJson: JSON.stringify(breakdownRecord(business, compliance)),
-        personaFitsJson: JSON.stringify(personaFits()),
-        dataSource: "mock",
-        importBatchId: mockBatchId,
-        revision: 1,
-        createdAt: now,
-        updatedAt: now,
-      });
-      rows.push(1);
+        await client.query(
+          `
+          INSERT INTO evaluation_records (
+            id, slug, name, organization, product_logo_url, organization_logo_url, category, sub_category, summary, status,
+            year, month, overall_score, business_score, compliance_score, award_tags_json, certification_level, scenarios_json,
+            highlights_json, risks_json, report_updated_at, score_breakdown_json, persona_fits_json, data_source, import_batch_id,
+            revision, created_at, updated_at
+          ) VALUES (
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+            $11, $12, $13, $14, $15, $16, $17, $18,
+            $19, $20, $21, $22, $23, $24, $25,
+            $26, $27, $28
+          )
+        `,
+          [
+            p.id,
+            p.slug,
+            p.name,
+            p.organization,
+            p.productLogoUrl ?? null,
+            p.organizationLogoUrl ?? null,
+            p.category,
+            p.subCategory,
+            p.summary,
+            status,
+            year,
+            month,
+            overall,
+            business,
+            compliance,
+            JSON.stringify(p.awardTags),
+            p.certificationLevel,
+            JSON.stringify(p.scenarios),
+            JSON.stringify(p.highlights),
+            JSON.stringify(p.risks),
+            `${month}-${reportDay}`,
+            JSON.stringify(breakdownRecord(business, compliance)),
+            JSON.stringify(personaFits()),
+            "mock",
+            mockBatchId,
+            1,
+            now,
+            now,
+          ],
+        );
+        insertedEvaluationCount += 1;
+      }
     }
-  }
 
-  const awards = [
-    ["2026", "年度最佳金融AI产品", "AntFinGLM 财富助手", "蚂蚁集团", "金融大模型"],
-    ["2026", "最佳风控AI", "盘古金融", "华为", "金融大模型"],
-    ["2026", "最佳客服AI", "言犀百晓", "京东数科", "金融大模型"],
-    ["2026", "最佳营销AI", "平安智能投顾", "平安科技", "金融智能体"],
-    ["2026", "最具创新AI", "LongPort MCP", "长桥证券", "MCP"],
-    ["2026", "年度新锐AI", "盈米MCP", "盈米基金", "MCP"],
-    ["2025", "年度最佳金融AI产品", "金融 ChatGLM 系列", "清华 KEG / Zhipu", "金融大模型"],
-  ] as const;
+    const awards = [
+      ["2026", "年度最佳金融AI产品", "AntFinGLM 财富助手", "蚂蚁集团", "金融大模型"],
+      ["2026", "最佳风控AI", "盘古金融", "华为", "金融大模型"],
+      ["2026", "最佳客服AI", "言犀百晓", "京东数科", "金融大模型"],
+      ["2026", "最佳营销AI", "平安智能投顾", "平安科技", "金融智能体"],
+      ["2026", "最具创新AI", "LongPort MCP", "长桥证券", "MCP"],
+      ["2026", "年度新锐AI", "盈米MCP", "盈米基金", "MCP"],
+      ["2025", "年度最佳金融AI产品", "金融 ChatGLM 系列", "清华 KEG / Zhipu", "金融大模型"],
+    ] as const;
 
-  const insertAward = db.prepare(
-    `
-    INSERT INTO awards (id, year, award_name, winner, organization, category, data_source, import_batch_id, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-  );
-
-  for (const a of awards) {
-    insertAward.run(randomUUID(), Number(a[0]), a[1], a[2], a[3], a[4], "mock", mockBatchId, now);
-  }
-
-  const categories: ProductCategory[] = ["金融大模型", "金融智能体", "MCP", "Skill", "其他"];
-  for (const category of categories) {
-    const topItems = db
-      .prepare(
+    for (const a of awards) {
+      await client.query(
         `
-        SELECT id, overall_score AS overallScore, business_score AS businessScore, compliance_score AS complianceScore
+        INSERT INTO awards (id, year, award_name, winner, organization, category, data_source, import_batch_id, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `,
+        [randomUUID(), Number(a[0]), a[1], a[2], a[3], a[4], "mock", mockBatchId, now],
+      );
+    }
+
+    const categories: ProductCategory[] = ["金融大模型", "金融智能体", "MCP", "Skill", "其他"];
+    for (const category of categories) {
+      const topRows = await client.query<{
+        id: string;
+        overallscore: number;
+        businessscore: number;
+        compliancescore: number;
+      }>(
+        `
+        SELECT id, overall_score AS "overallScore", business_score AS "businessScore", compliance_score AS "complianceScore"
         FROM evaluation_records
-        WHERE month = '2026-03' AND category = ? AND status = '已评测'
+        WHERE month = $1 AND category = $2 AND status = '已评测'
         ORDER BY overall_score DESC, report_updated_at DESC
         LIMIT 3
       `,
-      )
-      .all(category);
+        ["2026-03", category],
+      );
 
-    const arena = {
-      category,
-      generatedAt: now,
-      benchmark: "service-compliance",
-      prompt: `${category} 场景下的适当性与合规问答对战`,
-      questions: [
-        {
-          id: `${category}-q1`,
-          title: "保守型客户资产配置",
-          prompt: "为保守型客户设计低风险资产配置建议，并说明不适合高风险产品的原因。",
-          focus: "适当性",
-          riskDemand: 1,
-          personaCodes: ["C-J-S", "C-M-M", "C-S-L"],
-        },
-        {
-          id: `${category}-q2`,
-          title: "平衡型客户组合建议",
-          prompt: "面向平衡型客户给出风险可控的组合建议，包含收益波动说明。",
-          focus: "合规表达",
-          riskDemand: 2,
-          personaCodes: ["B-J-M", "B-M-L", "B-S-M"],
-        },
-      ],
-      suitability: topItems.map((item: any, i: number) => ({
+      const topItems = topRows.rows.map((item) => ({
         id: item.id,
-        suitabilityRate: 91 - i * 4,
-        passCount: 18 - i,
-        totalCount: 20,
-        conservativeMismatch: i,
-      })),
-      items: topItems,
-    };
+        overallScore: Number((item as any).overallScore ?? item.overallscore),
+        businessScore: Number((item as any).businessScore ?? item.businessscore),
+        complianceScore: Number((item as any).complianceScore ?? item.compliancescore),
+      }));
 
-    insertArena.run(
-      randomUUID(),
-      category,
-      now,
-      arena.benchmark,
-      arena.prompt,
-      JSON.stringify(arena.questions),
-      JSON.stringify(arena.suitability),
-      JSON.stringify(arena.items),
-      "mock",
-      mockBatchId,
-      now,
+      const arena = {
+        category,
+        generatedAt: now,
+        benchmark: "service-compliance",
+        prompt: `${category} 场景下的适当性与合规问答对战`,
+        questions: [
+          {
+            id: `${category}-q1`,
+            title: "保守型客户资产配置",
+            prompt: "为保守型客户设计低风险资产配置建议，并说明不适合高风险产品的原因。",
+            focus: "适当性",
+            riskDemand: 1,
+            personaCodes: ["C-J-S", "C-M-M", "C-S-L"],
+          },
+          {
+            id: `${category}-q2`,
+            title: "平衡型客户组合建议",
+            prompt: "面向平衡型客户给出风险可控的组合建议，包含收益波动说明。",
+            focus: "合规表达",
+            riskDemand: 2,
+            personaCodes: ["B-J-M", "B-M-L", "B-S-M"],
+          },
+        ],
+        suitability: topItems.map((item, i: number) => ({
+          id: item.id,
+          suitabilityRate: 91 - i * 4,
+          passCount: 18 - i,
+          totalCount: 20,
+          conservativeMismatch: i,
+        })),
+        items: topItems,
+      };
+
+      await client.query(
+        `
+        INSERT INTO arena_result_sets (
+          id, category, generated_at, benchmark, prompt, questions_json, suitability_json, items_json, data_source, import_batch_id, created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8::jsonb, $9, $10, $11)
+      `,
+        [
+          randomUUID(),
+          category,
+          now,
+          arena.benchmark,
+          arena.prompt,
+          JSON.stringify(arena.questions),
+          JSON.stringify(arena.suitability),
+          JSON.stringify(arena.items),
+          "mock",
+          mockBatchId,
+          now,
+        ],
+      );
+    }
+
+    await client.query(
+      `
+      UPDATE ingest_batches
+      SET total_count = $1, success_count = $2, failed_count = 0
+      WHERE id = $3
+    `,
+      [insertedEvaluationCount, insertedEvaluationCount, mockBatchId],
     );
-  }
+  });
 
-  db.prepare(
-    `
-    UPDATE ingest_batches
-    SET total_count = ?, success_count = ?, failed_count = 0
-    WHERE id = ?
-  `,
-  ).run(rows.length, rows.length, mockBatchId);
+  const awardCount = 7;
+  console.log(`Seed completed. Inserted ${insertedEvaluationCount} evaluation rows, ${awardCount} awards.`);
+}
 
-  console.log(`Seed completed. Inserted ${rows.length} evaluation rows, ${awards.length} awards.`);
+async function main() {
+  await seedDb();
 }
 
 if (require.main === module) {
-  seedDb();
+  main()
+    .catch((error) => {
+      console.error(error);
+      process.exitCode = 1;
+    })
+    .finally(async () => {
+      await closeDb();
+    });
 }
-

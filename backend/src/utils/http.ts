@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, type RequestHandler } from "express";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -36,4 +36,12 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
     message,
     requestId: req.requestId,
   });
+}
+
+export function asyncHandler(
+  handler: (req: Request, res: Response, next: NextFunction) => Promise<void>,
+): RequestHandler {
+  return (req, res, next) => {
+    Promise.resolve(handler(req, res, next)).catch(next);
+  };
 }
