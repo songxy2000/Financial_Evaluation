@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: financial_ai_eval
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d financial_ai_eval"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: 4100
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/financial_ai_eval
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_HOST_PORT:-4100}:4100"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "http=require('node:http');req=http.get('http://127.0.0.1:4100/health',res=>process.exit(res.statusCode===200?0:1));req.on('error',()=>process.exit(1));",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_BACKEND_API_BASE_URL: http://localhost:${BACKEND_HOST_PORT:-4100}
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      BACKEND_API_BASE_URL: http://backend:4100
+      NEXT_PUBLIC_BACKEND_API_BASE_URL: http://localhost:${BACKEND_HOST_PORT:-4100}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_HOST_PORT:-3000}:3000"
+
+volumes:
+  pg_data:
