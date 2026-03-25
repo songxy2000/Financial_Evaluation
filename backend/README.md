@@ -19,11 +19,11 @@ npm install
 
 ## 2. 启动 PostgreSQL
 
-推荐使用 docker-compose：
+推荐使用项目根目录的统一编排：
 
 ```bash
-cd backend
-docker compose up -d
+cd ..
+docker compose up -d postgres
 ```
 
 默认连接信息（已写入 `.env.example`）：
@@ -102,12 +102,14 @@ npm run crawl:run
 ## 7. 停止 PostgreSQL
 
 ```bash
-docker compose down
+cd ..
+docker compose stop postgres
 ```
 
 如需连数据一起清空：
 
 ```bash
+cd ..
 docker compose down -v
 ```
 

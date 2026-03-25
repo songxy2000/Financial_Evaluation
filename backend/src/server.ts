@@ -6,8 +6,9 @@ async function startServer() {
   await initDb();
 
   const app = createApp();
-  app.listen(config.port, () => {
-    console.log(`Backend listening on http://localhost:${config.port}`);
+  app.listen(config.port, config.host, () => {
+    const publicHost = config.host === "0.0.0.0" ? "localhost" : config.host;
+    console.log(`Backend listening on http://${publicHost}:${config.port}`);
     console.log(`Database: ${config.databaseUrl}`);
   });
 }
