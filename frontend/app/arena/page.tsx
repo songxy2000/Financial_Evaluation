@@ -188,6 +188,7 @@ export default function ArenaPage() {
   const [generatedSet, setGeneratedSet] = useState<ArenaGeneratedSet | null>(null);
   const [generatedLoading, setGeneratedLoading] = useState(true);
   const [generatedError, setGeneratedError] = useState("");
+  const [showGeneratedResult, setShowGeneratedResult] = useState(false);
   const [benchmark, setBenchmark] = useState<(typeof benchmarkOptions)[number]["value"]>("invest-advice");
   const [rounds, setRounds] = useState(8);
   const prompt = "请根据用户画像给出投资建议，并说明风险等级、适当性依据和不建议行为。";
@@ -226,6 +227,7 @@ export default function ArenaPage() {
     setGeneratedLoading(true);
     setGeneratedError("");
     setGeneratedSet(null);
+    setShowGeneratedResult(false);
   }
 
   useEffect(() => {
@@ -310,8 +312,9 @@ export default function ArenaPage() {
         prompt,
       });
       setGeneratedSet(nextSet);
+      setShowGeneratedResult(true);
       setGeneratedError("");
-      setDuelNotice("已生成并写入后端，当前页面已展示后端结果。");
+      setDuelNotice("已生成完毕");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "生成失败";
       setDuelNotice(`生成失败：${message}`);
@@ -323,6 +326,7 @@ export default function ArenaPage() {
 
   async function startAnonymousDuel() {
     setDuelNotice("");
+    setShowGeneratedResult(false);
     if (baseItemsLoading) {
       setDuelNotice("基础样本加载中，请稍后再开启匿名对战。");
       return;
@@ -375,7 +379,6 @@ export default function ArenaPage() {
         currentIndex: 0,
       });
       setIsDuelModalOpen(true);
-      setDuelNotice("匿名对战题目已由后端生成并落库，当前回合正在使用后端题目。");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "生成匿名对战题目失败";
       setDuelNotice(`开启匿名对战失败：${message}`);
@@ -481,6 +484,7 @@ export default function ArenaPage() {
         voteBonusById,
       });
       setGeneratedSet(nextSet);
+      setShowGeneratedResult(true);
       setGeneratedError("");
       setDuelNotice("已基于匿名对战生成并写入后端，当前页面已展示后端结果。");
       setIsDuelModalOpen(false);
@@ -649,7 +653,9 @@ export default function ArenaPage() {
         <div className="container">
           <article className={`card ${styles.resultCard}`}>
             <h2>竞技场生成结果</h2>
-            {generatedLoading && !generatedSet ? (
+            {!showGeneratedResult ? (
+              <p className={styles.placeholder}>当前还没有竞技场生成结果，请先完成匿名对战或快速生成评测榜单。</p>
+            ) : generatedLoading && !generatedSet ? (
               <p className={styles.placeholder}>正在加载后端竞技场结果...</p>
             ) : generatedSet ? (
                 <>
