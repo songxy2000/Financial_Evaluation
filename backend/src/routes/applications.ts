@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
+import { config } from "../config";
 import { query } from "../db/client";
+import { requireApiKey } from "../utils/auth";
 import { ApiError, asyncHandler } from "../utils/http";
 
 const applicationSchema = z.object({
@@ -66,6 +68,7 @@ applicationsRouter.post(
 
 applicationsRouter.get(
   "/",
+  requireApiKey(config.adminApiKey, "ADMIN_API_KEY"),
   asyncHandler(async (_req, res) => {
     const items = await query(
       `

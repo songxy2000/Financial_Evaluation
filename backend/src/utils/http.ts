@@ -30,10 +30,11 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
     return;
   }
 
+  const isProduction = process.env.NODE_ENV === "production";
   const message = err instanceof Error ? err.message : "Unknown error";
   res.status(500).json({
     code: "INTERNAL_ERROR",
-    message,
+    message: isProduction ? "Internal server error" : message,
     requestId: req.requestId,
   });
 }
