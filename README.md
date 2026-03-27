@@ -56,6 +56,12 @@ docker compose down
 docker compose down -v
 ```
 
+## 生产部署
+
+生产环境请使用 [docker-compose.prod.yml](/Users/songxiaoyu/Desktop/Financial_Evaluation_V2/docker-compose.prod.yml) 和 [.env.prod.example](/Users/songxiaoyu/Desktop/Financial_Evaluation_V2/.env.prod.example)。
+
+配套说明在 [deploy/README.md](/Users/songxiaoyu/Desktop/Financial_Evaluation_V2/deploy/README.md)，Nginx 配置模板在 [financial_evaluation_v2.conf](/Users/songxiaoyu/Desktop/Financial_Evaluation_V2/deploy/nginx/financial_evaluation_v2.conf)。
+
 ## 本地开发启动
 
 如果你想继续保留本机直接开发的方式，也可以分别启动前后端。
