@@ -1,3 +1,5 @@
+name: financial_ai_evaluation
+
 services:
   postgres:
     image: postgres:16
@@ -63,3 +65,4 @@ services:
 
 volumes:
   pg_data:
+    name: financial_ai_evaluation_pg_data
