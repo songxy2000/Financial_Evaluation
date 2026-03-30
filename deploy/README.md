@@ -38,12 +38,12 @@ docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend node
 
 ## 4. 配置 Nginx
 
-复制 `deploy/nginx/financial_evaluation_v2.conf` 到服务器的 Nginx 配置目录，并把 `server_name` 改成真实域名。
+复制 `deploy/nginx/financial_ai_evaluation.conf` 到服务器的 Nginx 配置目录，并把 `server_name` 改成真实域名。
 
 常见位置示例：
 
 ```bash
-sudo cp deploy/nginx/financial_evaluation_v2.conf /etc/nginx/conf.d/financial_evaluation_v2.conf
+sudo cp deploy/nginx/financial_ai_evaluation.conf /etc/nginx/conf.d/financial_ai_evaluation.conf
 ```
 
 然后重载 Nginx：
